@@ -39,3 +39,9 @@ For AVB-1.0
     source script/envsetup.sh
     lunch lineage_marlin-user
     m target-files-package otatools-package && script/release.sh marlin
+
+  To Generate delta
+
+    bash script/generate_delta.sh marlin \
+    out/release-marlin-2022031107/lineage_marlin-target_files-2022031107.zip \
+    out/release-marlin-2022041106/lineage_marlin-target_files-2022041106.zip
