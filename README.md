@@ -5,7 +5,10 @@ Getting Started
 
 For signed builds you need to generate keys, follow these steps
 
-For AVB-1.0+
+    source script/envsetup.sh
+    lunch lineage_marlin-user
+
+For AVB-1.0+ (eg: sargo- Pixel 3a)
 
     mkdir -p keys/sargo
     cd keys/sargo
@@ -18,7 +21,7 @@ For AVB-1.0+
     ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
     cd ../..
 
-For AVB-1.0
+For AVB-1.0 (eg: marlin- Pixel XL)
 
     mkdir -p keys/marlin
     cd keys/marlin
@@ -34,14 +37,21 @@ For AVB-1.0
     out/host/linux-x86/bin/generate_verity_key -convert keys/marlin/verity.x509.pem keys/marlin/verity_key
     openssl x509 -outform der -in keys/marlin/verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
 
-  To Build rom (factory and ota build)
+  To Build a11 or below roms (factory and ota build)
 
-    source script/envsetup.sh
-    lunch lineage_marlin-user
-    m target-files-package otatools-package && script/release.sh marlin
+    m target-files-package otatools-package
+    script/release.sh marlin
 
-  To Generate delta
+  For a12 roms
+
+    script/release12.sh marlin
+
+  To Generate delta (incremental updates)
 
     bash script/generate_delta.sh marlin \
-    out/release-marlin-2022031107/lineage_marlin-target_files-2022031107.zip \
-    out/release-marlin-2022041106/lineage_marlin-target_files-2022041106.zip
+    out/release-marlin-$BUILD_NUMBER/lineage_marlin-target_files-$BUILD_NUMBER.zip \
+    out/release-marlin-$BUILD_NUMBER/lineage_marlin-target_files-$BUILD_NUMBER.zip
+
+Note:
+- Output directory is out/release-marlin-$BUILD_NUMBER
+- For delta, its new target_files dir
