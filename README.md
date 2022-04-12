@@ -49,9 +49,9 @@ For AVB-1.0 (eg: marlin- Pixel XL)
   To Generate delta (incremental updates)
 
     bash script/generate_delta.sh marlin \
-    out/release-marlin-$BUILD_NUMBER/lineage_marlin-target_files-$BUILD_NUMBER.zip \
-    out/release-marlin-$BUILD_NUMBER/lineage_marlin-target_files-$BUILD_NUMBER.zip
+    out/release-marlin-$OLD_BUILD_NUMBER/lineage_marlin-target_files-$OLD_BUILD_NUMBER.zip \
+    out/release-marlin-$NEW_BUILD_NUMBER/lineage_marlin-target_files-$NEW_BUILD_NUMBER.zip
 
 Note:
-- Output directory is out/release-marlin-$BUILD_NUMBER
-- For delta, its new target_files dir
+- Out directory is out/release-marlin-$BUILD_NUMBER
+- For delta, out/release-marlin-$NEW_BUILD_NUMBER
