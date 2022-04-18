@@ -26,5 +26,8 @@ script/decrypt_keys.sh "$KEY_DIR"
 export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
 export PATH="$PWD/prebuilts/build-tools/path/linux-x86:$PATH"
 
+OLD_BUILDNO=$(basename $OLDZIP | sed -e s/[^0-9]//g)
+NEW_BUILDNO=$(basename $NEWZIP | sed -e s/[^0-9]//g)
+
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
-    -i $OLDZIP $NEWZIP $OTADIR/$DEVICE-incremental-$(date +'%m-%d-%Y').zip
+    -i $OLDZIP $NEWZIP $OTADIR/$DEVICE-incremental-$OLD_BUILDNO-$NEW_BUILDNO.zip
