@@ -6,12 +6,12 @@ Getting Started
 For signed builds you need to generate keys, follow these steps
 
     source script/envsetup.sh
-    lunch lineage_marlin-user
+    lunch lineage_alioth-user
 
-For AVB-1.0+ (eg: sargo- Pixel 3a)
+For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
 
-    mkdir -p keys/sargo
-    cd keys/sargo
+    mkdir -p keys/alioth
+    cd keys/alioth
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -23,8 +23,8 @@ For AVB-1.0+ (eg: sargo- Pixel 3a)
 
 For AVB-1.0 (eg: marlin- Pixel XL)
 
-    mkdir -p keys/marlin
-    cd keys/marlin
+    mkdir -p keys/alioth
+    cd keys/alioth
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -34,24 +34,24 @@ For AVB-1.0 (eg: marlin- Pixel XL)
     cd ../..
 
     make -j8 generate_verity_key
-    out/host/linux-x86/bin/generate_verity_key -convert keys/marlin/verity.x509.pem keys/marlin/verity_key
-    openssl x509 -outform der -in keys/marlin/verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
+    out/host/linux-x86/bin/generate_verity_key -convert keys/alioth/verity.x509.pem keys/alioth/verity_key
+    openssl x509 -outform der -in keys/alioth/verity.x509.pem -out kernel/xiaomi/sm8250/verifiedboot_marlin_relkeys.der.x509
 
   To Build a11 or below roms (factory and ota build)
 
-    m target-files-package otatools-package
-    script/release.sh marlin
+    m target-files-package otatools-package -j$(nproc --all)
+    script/release.sh alioth
 
   For a12 roms
 
-    script/release12.sh marlin
+    script/release12.sh alioth
 
   To Generate delta (incremental updates)
 
-    bash script/generate_delta.sh marlin \
-    out/release-marlin-$OLD_BUILD_NUMBER/lineage_marlin-target_files-$OLD_BUILD_NUMBER.zip \
-    out/release-marlin-$NEW_BUILD_NUMBER/lineage_marlin-target_files-$NEW_BUILD_NUMBER.zip
+    bash script/generate_delta.sh alioth \
+    out/release-alioth-$OLD_BUILD_NUMBER/lineage_alioth-target_files-$OLD_BUILD_NUMBER.zip \
+    out/release-alioth-$NEW_BUILD_NUMBER/lineage_alioth-target_files-$NEW_BUILD_NUMBER.zip
 
 Note:
-- Out directory is out/release-marlin-$BUILD_NUMBER
-- For delta, out/release-marlin-$NEW_BUILD_NUMBER
+- Out directory is out/release-alioth-$BUILD_NUMBER
+- For delta, out/release-alioth-$NEW_BUILD_NUMBER
