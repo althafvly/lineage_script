@@ -39,6 +39,9 @@ TARGET_FILES=$DEVICE-target_files-$BUILD.zip
 if [ -f $KEY_DIR/avb.pem ]; then
 	VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm SHA256_RSA2048
 					 --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm SHA256_RSA2048)
+elif [ -f $KEY_DIR/verity.x509.pem ]; then
+    VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub" --replace_verity_private_key "$KEY_DIR/verity"
+                     --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
 fi
 
 $RELEASE_OUT/otatools/releasetools/sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
