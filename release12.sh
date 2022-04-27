@@ -44,11 +44,7 @@ PRODUCT=$DEVICE
 
 TARGET_FILES=lineage_$DEVICE-target_files-$BUILD.zip
 
-AVB_PKMD="$KEY_DIR/avb_pkmd.bin"
-AVB_ALGORITHM=SHA256_RSA4096
-[[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
-
-sign_target_files_apks -o -d "$KEY_DIR" --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm $AVB_ALGORITHM \
+sign_target_files_apks -o -d "$KEY_DIR" --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm SHA256_RSA2048 \
     --extra_apks OsuLogin.apk,ServiceConnectivityResources.apk,ServiceWifiResources.apk="$KEY_DIR/releasekey" \
     --extra_apks com.android.adbd.apex="$KEY_DIR/releasekey" \
     --extra_apex_payload_key com.android.adbd.apex="$KEY_DIR/avb.pem" \

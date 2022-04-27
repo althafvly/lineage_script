@@ -37,12 +37,8 @@ PRODUCT=$1
 TARGET_FILES=$DEVICE-target_files-$BUILD.zip
 
 if [[ $DEVICE != hikey* ]]; then
-    AVB_PKMD="$KEY_DIR/avb_pkmd.bin"
-    AVB_ALGORITHM=SHA256_RSA4096
-    [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
-
-	VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm $AVB_ALGORITHM
-					 --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm $AVB_ALGORITHM)
+	VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm SHA256_RSA2048
+					 --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm SHA256_RSA2048)
 fi
 
 $RELEASE_OUT/otatools/releasetools/sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
