@@ -53,11 +53,11 @@ $RELEASE_OUT/otatools/releasetools/sign_target_files_apks -o -d "$KEY_DIR" "${VE
 if [[ $DEVICE != hikey* ]]; then
     $RELEASE_OUT/otatools/releasetools/ota_from_target_files -k "$KEY_DIR/releasekey" \
         "${EXTRA_OTA[@]}" $RELEASE_OUT/$TARGET_FILES \
-        $RELEASE_OUT/$DEVICE-ota_update-$BUILD.zip || exit 1
+        $RELEASE_OUT/lineage_$DEVICE-ota_update-$BUILD.zip || exit 1
 fi
 
 $RELEASE_OUT/otatools/releasetools/img_from_target_files $RELEASE_OUT/$TARGET_FILES \
-    $RELEASE_OUT/$DEVICE-img-$BUILD.zip || exit 1
+    $RELEASE_OUT/lineage_$DEVICE-img-$BUILD.zip || exit 1
 
 cd $RELEASE_OUT || exit 1
 cd ../..

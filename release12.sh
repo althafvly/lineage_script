@@ -103,6 +103,6 @@ sign_target_files_apks -o -d "$KEY_DIR" --avb_vbmeta_key "$KEY_DIR/avb.pem" --av
     "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $TARGET_FILES
 
 ota_from_target_files -k "$KEY_DIR/releasekey" "${EXTRA_OTA[@]}" $TARGET_FILES \
-    $DEVICE-ota_update-$BUILD.zip
+    lineage_$DEVICE-ota_update-$BUILD.zip
 
-img_from_target_files $TARGET_FILES $DEVICE-img-$BUILD.zip
+img_from_target_files $TARGET_FILES lineage_$DEVICE-img-$BUILD.zip
