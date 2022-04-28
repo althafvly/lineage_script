@@ -37,11 +37,13 @@ PRODUCT=$1
 TARGET_FILES=$DEVICE-target_files-$BUILD.zip
 
 if [ -f $KEY_DIR/avb.pem ]; then
-	VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm SHA256_RSA2048
-					 --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm SHA256_RSA2048)
+    AVB_ALGORITHM=SHA256_RSA4096
+    [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
+    VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm $AVB_ALGORITHM
+        --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm $AVB_ALGORITHM)
 elif [ -f $KEY_DIR/verity.x509.pem ]; then
     VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub" --replace_verity_private_key "$KEY_DIR/verity"
-                     --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
+        --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
 fi
 
 $RELEASE_OUT/otatools/releasetools/sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
@@ -50,7 +52,7 @@ $RELEASE_OUT/otatools/releasetools/sign_target_files_apks -o -d "$KEY_DIR" "${VE
     $RELEASE_OUT/$TARGET_FILES || exit 1
 
 $RELEASE_OUT/otatools/releasetools/ota_from_target_files -k "$KEY_DIR/releasekey" \
-	$RELEASE_OUT/$TARGET_FILES $RELEASE_OUT/lineage_$DEVICE-ota_update-$BUILD.zip || exit 1
+    $RELEASE_OUT/$TARGET_FILES $RELEASE_OUT/lineage_$DEVICE-ota_update-$BUILD.zip || exit 1
 
 $RELEASE_OUT/otatools/releasetools/img_from_target_files $RELEASE_OUT/$TARGET_FILES \
     $RELEASE_OUT/lineage_$DEVICE-img-$BUILD.zip || exit 1
