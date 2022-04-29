@@ -30,4 +30,4 @@ OLD_BUILDNO=$(basename $OLDZIP | sed -e s/[^0-9]//g)
 NEW_BUILDNO=$(basename $NEWZIP | sed -e s/[^0-9]//g)
 
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
-    -i $OLDZIP $NEWZIP $OTADIR/$DEVICE-incremental-$OLD_BUILDNO-$NEW_BUILDNO.zip
+    -i $OLDZIP $NEWZIP $OTADIR/lineage_$DEVICE-incremental-$OLD_BUILDNO-$NEW_BUILDNO.zip
