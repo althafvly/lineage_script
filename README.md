@@ -23,8 +23,8 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
 
 For AVB-1.0 (eg: marlin- Pixel XL)
 
-    mkdir -p keys/alioth
-    cd keys/alioth
+    mkdir -p keys/marlin
+    cd keys/marlin
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -34,8 +34,8 @@ For AVB-1.0 (eg: marlin- Pixel XL)
     cd ../..
 
     make -j8 generate_verity_key
-    out/host/linux-x86/bin/generate_verity_key -convert keys/alioth/verity.x509.pem keys/alioth/verity_key
-    openssl x509 -outform der -in keys/alioth/verity.x509.pem -out kernel/xiaomi/sm8250/verifiedboot_marlin_relkeys.der.x509
+    out/host/linux-x86/bin/generate_verity_key -convert keys/marlin/verity.x509.pem keys/marlin/verity_key
+    openssl x509 -outform der -in keys/marlin/verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
 
   To Build a11 or below roms (factory and ota build)
 
