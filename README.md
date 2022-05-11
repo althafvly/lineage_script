@@ -17,7 +17,7 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
     ../../development/tools/make_key shared '/CN=LineageOS/'
     ../../development/tools/make_key media '/CN=LineageOS/'
     ../../development/tools/make_key networkstack '/CN=LineageOS/'
-    openssl genrsa 4096 | openssl pkcs8 -topk8 -scrypt -out avb.pem
+    openssl genrsa 2048 | openssl pkcs8 -topk8 -scrypt -out avb.pem
     ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
     cd ../..
 
