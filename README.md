@@ -12,6 +12,7 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
 
     mkdir -p keys/alioth
     cd keys/alioth
+    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -25,6 +26,7 @@ For AVB-1.0 (eg: marlin- Pixel XL)
 
     mkdir -p keys/marlin
     cd keys/marlin
+    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -40,11 +42,18 @@ For AVB-1.0 (eg: marlin- Pixel XL)
   To Build a11 or below roms (factory and ota build)
 
     m target-files-package otatools-package -j$(nproc --all)
+
+  For a11 roms
+
     script/release.sh alioth
 
   For a12 roms
 
     script/release12.sh alioth
+
+  For a13 roms
+
+    script/release13.sh alioth
 
   To Generate delta (incremental updates)
 

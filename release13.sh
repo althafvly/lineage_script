@@ -48,7 +48,15 @@ if [ -f $KEY_DIR/avb.pem ]; then
 	AVB_ALGORITHM=SHA256_RSA4096
 	[[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
 	sign_target_files_apks -o -d "$KEY_DIR" --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm $AVB_ALGORITHM \
-		--extra_apks OsuLogin.apk,ServiceConnectivityResources.apk,ServiceWifiResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks AdServicesApk.apk="$KEY_DIR/releasekey" \
+		--extra_apks Bluetooth.apk="$KEY_DIR/bluetooth" \
+		--extra_apks HalfSheetUX.apk="$KEY_DIR/releasekey" \
+		--extra_apks OsuLogin.apk="$KEY_DIR/releasekey" \
+		--extra_apks SafetyCenterResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks ServiceConnectivityResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks ServiceUwbResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks ServiceWifiResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks WifiDialog.apk="$KEY_DIR/releasekey" \
 		--extra_apks com.android.adbd.apex="$KEY_DIR/releasekey" \
 		--extra_apex_payload_key com.android.adbd.apex="$KEY_DIR/avb.pem" \
 		--extra_apks com.android.apex.cts.shim.apex="$KEY_DIR/releasekey" \
@@ -99,12 +107,32 @@ if [ -f $KEY_DIR/avb.pem ]; then
 		--extra_apex_payload_key com.android.wifi.apex="$KEY_DIR/avb.pem" \
 		--extra_apks com.google.pixel.camera.hal.apex="$KEY_DIR/releasekey" \
 		--extra_apex_payload_key com.google.pixel.camera.hal.apex="$KEY_DIR/avb.pem" \
+		--extra_apks com.android.adservices.apex="$KEY_DIR/releasekey" \
+		--extra_apex_payload_key com.android.adservices.apex="$KEY_DIR/avb.pem" \
+		--extra_apks com.android.btservices.apex="$KEY_DIR/bluetooth" \
+		--extra_apex_payload_key com.android.btservices.apex="$KEY_DIR/avb.pem" \
+		--extra_apks com.android.compos.apex="$KEY_DIR/releasekey" \
+		--extra_apex_payload_key com.android.compos.apex="$KEY_DIR/avb.pem" \
+		--extra_apks com.android.ondevicepersonalization.apex="$KEY_DIR/releasekey" \
+		--extra_apex_payload_key com.android.ondevicepersonalization.apex="$KEY_DIR/avb.pem" \
+		--extra_apks com.android.uwb.apex="$KEY_DIR/releasekey" \
+		--extra_apex_payload_key com.android.uwb.apex="$KEY_DIR/avb.pem" \
+		--extra_apks com.android.virt.apex="$KEY_DIR/releasekey" \
+		--extra_apex_payload_key com.android.virt.apex="$KEY_DIR/avb.pem" \
 		"$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $TARGET_FILES
 elif [ -f $KEY_DIR/verity.x509.pem ]; then
 	VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub" --replace_verity_private_key "$KEY_DIR/verity"
 		--replace_verity_keyid "$KEY_DIR/verity.x509.pem")
 	sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
-		--extra_apks OsuLogin.apk,ServiceConnectivityResources.apk,ServiceWifiResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks AdServicesApk.apk="$KEY_DIR/releasekey" \
+		--extra_apks Bluetooth.apk="$KEY_DIR/bluetooth" \
+		--extra_apks HalfSheetUX.apk="$KEY_DIR/releasekey" \
+		--extra_apks OsuLogin.apk="$KEY_DIR/releasekey" \
+		--extra_apks SafetyCenterResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks ServiceConnectivityResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks ServiceUwbResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks ServiceWifiResources.apk="$KEY_DIR/releasekey" \
+		--extra_apks WifiDialog.apk="$KEY_DIR/releasekey" \
 		"$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $TARGET_FILES
 fi
 
