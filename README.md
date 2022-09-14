@@ -12,7 +12,6 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
 
     mkdir -p keys/alioth
     cd keys/alioth
-    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -22,11 +21,14 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
     ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
     cd ../..
 
+  For a13 roms
+
+    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
+
 For AVB-1.0 (eg: marlin- Pixel XL)
 
     mkdir -p keys/marlin
     cd keys/marlin
-    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -38,6 +40,11 @@ For AVB-1.0 (eg: marlin- Pixel XL)
     make -j8 generate_verity_key
     out/host/linux-x86/bin/generate_verity_key -convert keys/marlin/verity.x509.pem keys/marlin/verity_key
     openssl x509 -outform der -in keys/marlin/verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
+
+
+  For a13 roms
+
+    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
 
   To Build a11 or below roms (factory and ota build)
 
