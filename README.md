@@ -3,15 +3,18 @@ Getting Started
 
     git clone https://github.com/althafvly/lineage_script script
 
-For signed builds you need to generate keys, follow these steps
+1 - For signed builds you need to generate keys, follow these steps
 
     source script/envsetup.sh
     lunch lineage_alioth-user
+
+2 - Generate keys (Skip this step if you have already generated, make sure its in keys directory)
 
 For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
 
     mkdir -p keys/alioth
     cd keys/alioth
+    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -21,14 +24,11 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
     ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
     cd ../..
 
-  For a13 roms
-
-    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
-
 For AVB-1.0 (eg: marlin- Pixel XL)
 
     mkdir -p keys/marlin
     cd keys/marlin
+    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
@@ -36,38 +36,21 @@ For AVB-1.0 (eg: marlin- Pixel XL)
     ../../development/tools/make_key networkstack '/CN=LineageOS/'
     ../../development/tools/make_key verity '/CN=LineageOS/'
     cd ../..
-
     make -j8 generate_verity_key
     out/host/linux-x86/bin/generate_verity_key -convert keys/marlin/verity.x509.pem keys/marlin/verity_key
     openssl x509 -outform der -in keys/marlin/verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
 
-
-  For a13 roms
-
-    ../../development/tools/make_key bluetooth '/CN=LineageOS/'
-
-  To Build a11 or below roms (factory and ota build)
+3 - Build (factory and ota build)
 
     m target-files-package otatools-package -j$(nproc --all)
-
-  For a11 roms
-
     script/release.sh alioth
 
-  For a12 roms
-
-    script/release12.sh alioth
-
-  For a13 roms
-
-    script/release13.sh alioth
-
-  To Generate delta (incremental updates)
+4 - (Optional) Generate delta packages (Incremental updates)
 
     bash script/generate_delta.sh alioth \
     out/release-alioth-$OLD_BUILD_NUMBER/lineage_alioth-target_files-$OLD_BUILD_NUMBER.zip \
     out/release-alioth-$NEW_BUILD_NUMBER/lineage_alioth-target_files-$NEW_BUILD_NUMBER.zip
 
 Note:
-- Out directory is out/release-alioth-$BUILD_NUMBER
-- For delta, out/release-alioth-$NEW_BUILD_NUMBER
+- Build out directory is out/release-alioth-$BUILD_NUMBER
+- Build out for delta is out/release-alioth-$NEW_BUILD_NUMBER
