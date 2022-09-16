@@ -2,14 +2,14 @@
 
 set -o errexit -o pipefail
 
-user_error() {
+print() {
 	echo $1 >&2
 	exit 1
 }
 
-[[ $# -eq 1 ]] || user_error "expected a single argument (device type)"
-[[ -n $BUILD_NUMBER ]] || user_error "expected BUILD_NUMBER in the environment"
-[[ -n $OUT ]] || user_error "expected OUT in the environment"
+[[ $# -eq 1 ]] || print "expected a single argument (device type)"
+[[ -n $BUILD_NUMBER ]] || print "expected BUILD_NUMBER in the environment"
+[[ -n $OUT ]] || print "expected OUT in the environment"
 
 chrt -b -p 0 $$
 
@@ -140,3 +140,7 @@ ota_from_target_files -k "$KEY_DIR/releasekey" $TARGET_FILES \
 	lineage_$DEVICE-ota_update-$BUILD.zip
 
 img_from_target_files $TARGET_FILES lineage_$DEVICE-img-$BUILD.zip
+
+print "Fastboot image: $RELEASE_OUT/lineage_$DEVICE-img-$BUILD.zip"
+print "Recovery zip: $RELEASE_OUT/lineage_$DEVICE-ota_update-$BUILD.zip"
+print "Finished."
