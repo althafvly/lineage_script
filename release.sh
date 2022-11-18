@@ -37,12 +37,9 @@ KEY_DIR=keys
 
 export PATH="$PWD/bin:$PATH"
 
-BUILD=$BUILD_NUMBER
-VERSION=$BUILD_NUMBER
 DEVICE=$1
-PRODUCT=$DEVICE
 
-TARGET_FILES=lineage_$DEVICE-target_files-$BUILD.zip
+TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
 
 if [ -f $KEY_DIR/avb.pem ]; then
 	AVB_ALGORITHM=SHA256_RSA4096
@@ -109,6 +106,8 @@ elif [ -f $KEY_DIR/verity.x509.pem ]; then
 fi
 
 ota_from_target_files -k "$KEY_DIR/releasekey" $TARGET_FILES \
-	lineage_$DEVICE-ota_update-$BUILD.zip
+	lineage-19.1-$BUILD_NUMBER-recovery-$DEVICE-signed.zip
 
-img_from_target_files $TARGET_FILES lineage_$DEVICE-img-$BUILD.zip
+img_from_target_files $TARGET_FILES lineage-19.1-$BUILD_NUMBER-fastboot-$DEVICE-signed.zip
+
+print "Finished."
