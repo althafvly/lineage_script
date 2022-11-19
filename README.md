@@ -16,6 +16,7 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
     cd keys/alioth
     ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
+    ../../development/tools/make_key sdk_sandbox '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
     ../../development/tools/make_key media '/CN=LineageOS/'
@@ -30,6 +31,7 @@ For AVB-1.0 (eg: marlin- Pixel XL)
     cd keys/marlin
     ../../development/tools/make_key bluetooth '/CN=LineageOS/'
     ../../development/tools/make_key releasekey '/CN=LineageOS/'
+    ../../development/tools/make_key sdk_sandbox '/CN=LineageOS/'
     ../../development/tools/make_key platform '/CN=LineageOS/'
     ../../development/tools/make_key shared '/CN=LineageOS/'
     ../../development/tools/make_key media '/CN=LineageOS/'
