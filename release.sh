@@ -13,7 +13,11 @@ print() {
 
 chrt -b -p 0 $$
 
+COMMON_KEY_DIR=keys/common
 PERSISTENT_KEY_DIR=keys/$1
+if [ -d COMMON_KEY_DIR ]; then
+    PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
+fi
 RELEASE_OUT=out/release-$1-$BUILD_NUMBER
 
 # decrypt keys in advance for improved performance and modern algorithm support

@@ -11,7 +11,11 @@ user_error() {
 
 chrt -b -p 0 $$
 
+COMMON_KEY_DIR=keys/common
 PERSISTENT_KEY_DIR=keys/$1
+if [ -d COMMON_KEY_DIR ]; then
+    PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
+fi
 DEVICE=$1
 OLDZIP=$2
 NEWZIP=$3
