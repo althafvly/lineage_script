@@ -16,11 +16,11 @@ Create folder new keys
 
 Generate keys to sign apks
 
-    ../../development/tools/make_key releasekey '/CN=LineageOS/'
-    ../../development/tools/make_key platform '/CN=LineageOS/'
-    ../../development/tools/make_key shared '/CN=LineageOS/'
-    ../../development/tools/make_key media '/CN=LineageOS/'
-    ../../development/tools/make_key networkstack '/CN=LineageOS/'
+    script/make_key.sh releasekey '/CN=LineageOS/'
+    script/make_key.sh platform '/CN=LineageOS/'
+    script/make_key.sh shared '/CN=LineageOS/'
+    script/make_key.sh media '/CN=LineageOS/'
+    script/make_key.sh networkstack '/CN=LineageOS/'
     cd ../..
 
 For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
@@ -31,7 +31,7 @@ For AVB-1.0+ (eg: sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3)
 For AVB-1.0 (eg: marlin- Pixel XL)
 
     cd keys/marlin
-    ../../development/tools/make_key verity '/CN=LineageOS/'
+    script/make_key.sh verity '/CN=LineageOS/'
     cd ../..
     make -j8 generate_verity_key
     out/host/linux-x86/bin/generate_verity_key -convert keys/marlin/verity.x509.pem keys/marlin/verity_key
