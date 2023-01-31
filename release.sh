@@ -140,6 +140,10 @@ fi
 ota_from_target_files -k "$KEY_DIR/releasekey" $TARGET_FILES \
     lineage-20.0-$BUILD_NUMBER-recovery-$DEVICE-signed.zip
 
-img_from_target_files $TARGET_FILES lineage-20.0-$BUILD_NUMBER-fastboot-$DEVICE-signed.zip
+echo "Do you want to generate fastboot package ?"
+read -p "Older devices might have issues generating. Yes(y) / Default(n) : " choice
+if [ "$choice" = "y" ]; then
+    img_from_target_files $TARGET_FILES lineage-20.0-$BUILD_NUMBER-fastboot-$DEVICE-signed.zip
+fi
 
 print "Finished."
