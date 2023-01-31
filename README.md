@@ -1,6 +1,6 @@
 ## Getting Started
 
-    git clone https://github.com/althafvly/lineage_script script
+    git clone https://github.com/althafvly/lineage_script -b master script
 
 1 - For signed builds you need to generate keys, follow these steps
 
@@ -16,9 +16,14 @@ Create folder new keys
 
 Generate keys to sign apks
 
+For android T (13) only
+
     script/make_key.sh bluetooth '/CN=LineageOS/'
-    script/make_key.sh releasekey '/CN=LineageOS/'
     script/make_key.sh sdk_sandbox '/CN=LineageOS/'
+
+Common 
+
+    script/make_key.sh releasekey '/CN=LineageOS/'
     script/make_key.sh platform '/CN=LineageOS/'
     script/make_key.sh shared '/CN=LineageOS/'
     script/make_key.sh media '/CN=LineageOS/'
@@ -42,7 +47,18 @@ For AVB-1.0 (eg: marlin- Pixel XL)
 3 - Build (factory and ota build)
 
     m target-files-package otatools-package -j$(nproc --all)
+
+For android 11 or below
+
     script/release.sh alioth
+
+For android 12
+
+    script/release_s.sh alioth
+
+For android 13
+
+    script/release_t.sh alioth
 
 4 - (Optional) Generate delta packages (Incremental updates)
 
