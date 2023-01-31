@@ -50,7 +50,7 @@ read -p "Enter password for '$1' (blank for none; password will be visible): " \
   password
 
 if [ "${3}" = "rsa" -o "$#" -eq 2 ]; then
-  ( openssl genrsa -f4 2048 | tee ${one} > ${two} ) &
+  ( openssl genrsa -f4 4096 | tee ${one} > ${two} ) &
   hash="-sha256"
 elif [ "${3}" = "ec" ]; then
   ( openssl ecparam -name prime256v1 -genkey -noout | tee ${one} > ${two} ) &
