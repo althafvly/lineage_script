@@ -7,6 +7,8 @@ user_error() {
     exit 1
 }
 
+dir="$(dirname "$(realpath "$0")")"
+
 [[ $# -eq 1 ]] || user_error "expected a single argument (device type)"
 [[ -n $BUILD_NUMBER ]] || user_error "expected BUILD_NUMBER in the environment"
 
@@ -19,7 +21,7 @@ RELEASE_OUT=out/release-$1-$BUILD_NUMBER
 KEY_DIR=$(mktemp -d /dev/shm/release_keys.XXXXXXXXXX) || exit 1
 trap "rm -rf \"$KEY_DIR\"" EXIT
 cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR" || exit 1
-script/decrypt_keys.sh "$KEY_DIR" || exit 1
+$dir/script/decrypt_keys.sh "$KEY_DIR" || exit 1
 
 OLD_PATH="$PATH"
 export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"

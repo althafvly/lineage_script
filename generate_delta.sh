@@ -7,6 +7,8 @@ user_error() {
     exit 1
 }
 
+dir="$(dirname "$(realpath "$0")")"
+
 [[ $# -eq 3 ]] || user_error "expected 3 arguments (device, old_target.zip, new_target.zip)"
 
 chrt -b -p 0 $$
@@ -25,7 +27,7 @@ OTADIR=${NEWZIP%/*}
 KEY_DIR=$(mktemp -d --tmpdir delta_keys.XXXXXXXXXX)
 trap "rm -rf \"$KEY_DIR\"" EXIT
 cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR"
-script/decrypt_keys.sh "$KEY_DIR"
+$dir/script/decrypt_keys.sh "$KEY_DIR"
 
 export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
 export PATH="$PWD/prebuilts/build-tools/path/linux-x86:$PATH"
