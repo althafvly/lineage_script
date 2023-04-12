@@ -37,17 +37,7 @@ For AVB-1.0 (eg: marlin- Pixel XL)
 
 4 - Generate signed build
 
-For android 11 or below
-
     script/release.sh alioth
-
-For android 12
-
-    script/release_s.sh alioth
-
-For android 13
-
-    script/release_t.sh alioth
 
 5 - (Optional) Generate delta packages (Incremental updates)
 
