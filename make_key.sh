@@ -17,7 +17,8 @@
 # Generates a public/private key pair suitable for use in signing
 # android .apks and OTA update packages.
 
-if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+# Check for correct number of arguments
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
   cat <<EOF
 Usage: $0 <name> <subject> [<keytype>]
 
@@ -27,6 +28,7 @@ EOF
   exit 2
 fi
 
+# Check if files already exist with the same name
 if [[ -e $1.pk8 || -e $1.x509.pem ]]; then
   echo "$1.pk8 and/or $1.x509.pem already exist; please delete them first"
   echo "if you want to replace them."
@@ -36,40 +38,42 @@ fi
 # Use named pipes to connect get the raw RSA private key to the cert-
 # and .pk8-creating programs, to avoid having the private key ever
 # touch the disk.
-
 tmpdir=$(mktemp -d)
 trap 'rm -rf ${tmpdir}; echo; exit 1' EXIT INT QUIT
-
 one=${tmpdir}/one
 two=${tmpdir}/two
-mknod ${one} p
-mknod ${two} p
-chmod 0600 ${one} ${two}
+mknod "${one}" p
+mknod "${two}" p
+chmod 0600 "${one}" "${two}"
 
-read -p "Enter password for '$1' (blank for none; password will be visible): " \
-  password
+# Prompt user for password
+read -r -p "Enter password for '$1' (blank for none; password will be visible): " password
 
-if [ "${3}" = "rsa" -o "$#" -eq 2 ]; then
-  ( openssl genrsa -f4 4096 | tee ${one} > ${two} ) &
+if [ "${3}" = "rsa" ] || [ "$#" -eq 2 ]; then
+  # Generate an RSA private key
+  ( openssl genrsa -f4 4096 | tee "${one}" > "${two}" ) &
   hash="-sha256"
 elif [ "${3}" = "ec" ]; then
-  ( openssl ecparam -name prime256v1 -genkey -noout | tee ${one} > ${two} ) &
+  # Generate an EC private key
+  ( openssl ecparam -name prime256v1 -genkey -noout | tee "${one}" > "${two}" ) &
   hash="-sha256"
 else
   echo "Only accepts RSA or EC keytypes."
   exit 1
 fi
 
-openssl req -new -x509 ${hash} -key ${two} -out $1.x509.pem \
+# Generate the certificate
+openssl req -new -x509 ${hash} -key "${two}" -out "$1.x509.pem" \
   -days 10000 -subj "$2" &
 
+# Generate the PKCS#8 formatted private key
 if [ "${password}" == "" ]; then
   echo "creating ${1}.pk8 with no password"
-  openssl pkcs8 -in ${one} -topk8 -outform DER -out $1.pk8 -nocrypt
+  openssl pkcs8 -in "${one}" -topk8 -outform DER -out "$1.pk8" -nocrypt
 else
   echo "creating ${1}.pk8 with password [${password}]"
   export password
-  openssl pkcs8 -in ${one} -topk8 -v1 PBE-SHA1-3DES -outform DER -out $1.pk8 \
+  openssl pkcs8 -in "${one}" -topk8 -v1 PBE-SHA1-3DES -outform DER -out "$1.pk8" \
     -passout env:password
   unset password
 fi
