@@ -4,7 +4,7 @@
 dir="$(dirname "$(realpath "$0")")"
 
 # Extract the build ID from the build/make/core/build_id.mk file
-build_id=$(grep -o 'BUILD_ID=.*' build/make/core/build_id.mk | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
+build_id=$(grep -o 'BUILD_ID=.*' "$dir"/../build/make/core/build_id.mk | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
 
 # If the build ID is one of 'r', 's', or 't', run the appropriate release script for that build
 if [[ "$build_id" == [rst] ]]; then
