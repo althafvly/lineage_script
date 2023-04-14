@@ -27,6 +27,12 @@
     ```
     - Run the generate_keys.sh script to generate the keys:
     ```
+    Usage: generate_keys.sh [-a] [-n] [-h]
+      -a   Optionally generate apex certs
+      -n   Do not prompt for password
+      -h   Display this help message
+    ```
+    ```
     ../../script/generate_keys.sh
     ```
     - For AVB-1.0+ (e.g. sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3), generate the keys using the following commands:

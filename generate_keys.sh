@@ -5,8 +5,15 @@ apex=false
 no_pass=false
 
 # Allow decrypted certs and optional apex certs
-while getopts ":an" opt; do
+while getopts ":han" opt; do
   case ${opt} in
+    h )
+      echo "Usage: script.sh [-a] [-n] [-h]"
+      echo "  -a   Optionally generate apex certs"
+      echo "  -n   Do not prompt for password"
+      echo "  -h   Display this help message"
+      exit 0
+      ;;
     a )
       apex=true
       ;;
