@@ -36,19 +36,32 @@
     ../../script/generate_keys.sh
     ```
     - For AVB-1.0+ (e.g. sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3), generate the keys using the following commands:
+        - In the case of SHA256_RSA4096 / SHA256_RSA2048
+        ```
+        openssl genrsa 4096 | openssl pkcs8 -topk8 -scrypt -out avb.pem
+        ```
+        ```
+        openssl genrsa 2048 | openssl pkcs8 -topk8 -scrypt -out avb.pem
+        ```
+        - Or without password-based encryption, In the case of SHA256_RSA4096 / SHA256_RSA2048
+        ```
+        openssl genrsa -out avb.pem 4096
+        ```
+        ```
+        openssl genrsa -out avb.pem 2048
+        ```
     ```
-    openssl genrsa 2048 | openssl pkcs8 -topk8 -scrypt -out avb.pem
     ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
     ```
     - For AVB-1.0 (e.g. marlin- Pixel XL), generate the keys using the following commands:
-    ```
-    ../../out/host/linux-x86/bin/generate_verity_key -convert verity.x509.pem verity_key
-    openssl x509 -outform der -in verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
-    ```
-    - Navigate back to the build directory:
-    ```
-    cd ../../
-    ```
+        ```
+        ../../out/host/linux-x86/bin/generate_verity_key -convert verity.x509.pem verity_key
+        openssl x509 -outform der -in verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
+        ```
+        - Navigate back to the build directory:
+        ```
+        cd ../../
+        ```
 4.  Generate a signed build OTA and factory image using the following command:
     ```
     script/release.sh alioth
