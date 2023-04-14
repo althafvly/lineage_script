@@ -5,12 +5,13 @@ apex=false
 no_pass=false
 
 # Allow decrypted certs and optional apex certs
-while getopts ":han" opt; do
+while getopts ":hanv" opt; do
   case ${opt} in
     h )
-      echo "Usage: script.sh [-a] [-n] [-h]"
+      echo "Usage: script.sh [-a] [-n] [-v] [-h]"
       echo "  -a   Optionally generate apex certs"
       echo "  -n   Do not prompt for password"
+      echo "  -v   Generate AVB certificate"
       echo "  -h   Display this help message"
       exit 0
       ;;
@@ -19,6 +20,9 @@ while getopts ":han" opt; do
       ;;
     n )
       no_pass=true
+      ;;
+    v )
+      avb=true
       ;;
     \? )
       echo "Invalid option: $OPTARG" 1>&2
@@ -88,7 +92,34 @@ if [ "$apex" = true ]; then
   common+=$apex_packages
 fi
 
-# Loop through the certificate names and generate keys using the make_key.sh script
-for cert in $common; do \
-    no_password=$no_pass "$dir"/make_key.sh "$cert" "$subject"
-done
+if [ "$avb" = true ]; then
+  echo "Do you want SHA256_RSA4096 or SHA256_RSA2048?"
+  echo "1) SHA256_RSA4096"
+  echo "2) SHA256_RSA2048"
+  read -r -p "Select an option: " option
+
+  case $option in
+    1)
+      rsa=4096
+      ;;
+    2)
+      rsa=2048
+      ;;
+    *)
+      echo "Invalid option. Please select 1 or 2."
+      exit 1
+      ;;
+  esac
+
+  if [ "$no_pass" = true ]; then
+    openssl genrsa -out avb.pem $rsa
+  else
+    openssl genrsa $rsa | openssl pkcs8 -topk8 -scrypt -out avb.pem
+  fi
+  ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
+else
+  # Loop through the certificate names and generate keys using the make_key.sh script
+  for cert in $common; do \
+      no_password=$no_pass "$dir"/make_key.sh "$cert" "$subject"
+  done
+fi
