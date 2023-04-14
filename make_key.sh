@@ -47,7 +47,11 @@ mknod "${two}" p
 chmod 0600 "${one}" "${two}"
 
 # Prompt user for password
-read -r -p "Enter password for '$1' (blank for none; password will be visible): " password
+if [ ! "$no_password" = true ]; then
+  read -r -p "Enter password for '$1' (blank for none; password will be visible): " password
+else
+  password=""
+fi
 
 if [ "${3}" = "rsa" ] || [ "$#" -eq 2 ]; then
   # Generate an RSA private key
