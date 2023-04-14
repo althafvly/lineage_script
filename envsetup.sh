@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -o errexit -o nounset -o pipefail
-
 # set the umask to 022 for default file permissions
 umask 022
 # create an alias for the "which" command to use the built-in "command" command
