@@ -9,9 +9,11 @@ user_error() {
   exit 1
 }
 
+# Get the directory containing this script
+dir="$(dirname "$(realpath "$0")")"
+
 # Get the directory containing the script and make sure we have one argument (device type).
 # Also, make sure that the BUILD_NUMBER environment variable is set.
-dir="$(dirname "$(realpath "$0")")"
 [[ $# -eq 1 ]] || user_error "expected a single argument (device type)"
 [[ -n $BUILD_NUMBER ]] || user_error "expected BUILD_NUMBER in the environment"
 
