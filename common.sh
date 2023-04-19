@@ -36,7 +36,7 @@ RELEASE_OUT=out/release-$1-$BUILD_NUMBER
 KEY_DIR=$(mktemp -d /dev/shm/release_keys.XXXXXXXXXX)
 trap 'rm -rf \"$KEY_DIR\" && rm -f \"$PWD/$RELEASE_OUT/keys\"' EXIT
 cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR"
-"$dir"/script/decrypt_keys.sh "$KEY_DIR"
+"$dir"/decrypt_keys.sh "$KEY_DIR"
 
 # Add the build tools to the PATH
 export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
