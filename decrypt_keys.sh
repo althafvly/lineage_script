@@ -21,7 +21,6 @@ echo
 
 # Create a temporary directory and set a trap to delete it when the script exits
 tmp="$(mktemp -d /dev/shm/decrypt_keys.XXXXXXXXXX)"
-trap 'rm -rf \"$tmp\"' EXIT
 
 # Set the password environment variable
 export password
@@ -51,3 +50,4 @@ unset password
 
 # Move the decrypted keys to the original directory
 mv "$tmp"/* .
+rm -rf "$tmp"

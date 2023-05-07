@@ -36,7 +36,6 @@ RELEASE_OUT=$PWD/out/release-$1-$BUILD_NUMBER
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
 KEY_DIR=$(mktemp -d /dev/shm/release_keys.XXXXXXXXXX)
-trap 'rm -rf \"$KEY_DIR\"' EXIT
 cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR"
 "$dir"/decrypt_keys.sh "$KEY_DIR"
 
@@ -46,7 +45,6 @@ mkdir -p "$RELEASE_OUT" || exit 1
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.
 unzip "$OUT/otatools.zip" -d "$RELEASE_OUT/otatools" || exit 1
-trap 'rm -rf \"$RELEASE_OUT/otatools\"' EXIT
 cd "$RELEASE_OUT/otatools"
 
 # Add the OTA tools to the PATH
@@ -263,3 +261,6 @@ for i in "${!IMAGES[@]}"; do
         unzip -j -q "$RELEASE_OUT/$FASTBOOT_PACKAGE" "${IMAGES[i]}.img" -d "$RELEASE_OUT"
     fi
 done
+
+cd "$RELEASE_OUT"
+rm -rf "$KEY_DIR" "$RELEASE_OUT/otatools"

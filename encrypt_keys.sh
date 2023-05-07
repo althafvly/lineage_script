@@ -31,7 +31,6 @@ fi
 
 # Create a temporary directory for the encrypted keys
 tmp="$(mktemp -d /dev/shm/encrypt_keys.XXXXXXXXXX)"
-trap 'rm -rf \"$tmp\"' EXIT
 
 # Export password and new_password for openssl to use
 export password
@@ -63,3 +62,4 @@ unset new_password
 
 # Move encrypted keys from temp directory to key directory
 mv "$tmp"/* .
+rm -rf "$tmp"
