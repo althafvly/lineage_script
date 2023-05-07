@@ -44,7 +44,8 @@ rm -rf "$RELEASE_OUT" || exit 1
 mkdir -p "$RELEASE_OUT" || exit 1
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.
-unzip "$OUT/otatools.zip" -d "$RELEASE_OUT/otatools" || exit 1
+cp "$OUT/otatools.zip" "$RELEASE_OUT/otatools.zip"
+unzip "$RELEASE_OUT/otatools.zip" -d "$RELEASE_OUT/otatools" || exit 1
 cd "$RELEASE_OUT/otatools"
 
 # Add the OTA tools to the PATH
