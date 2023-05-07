@@ -93,28 +93,10 @@ if [ "$apex" = true ]; then
 fi
 
 if [ "$avb" = true ]; then
-  echo "Do you want SHA256_RSA4096 or SHA256_RSA2048?"
-  echo "1) SHA256_RSA4096"
-  echo "2) SHA256_RSA2048"
-  read -r -p "Select an option: " option
-
-  case $option in
-    1)
-      rsa=4096
-      ;;
-    2)
-      rsa=2048
-      ;;
-    *)
-      echo "Invalid option. Please select 1 or 2."
-      exit 1
-      ;;
-  esac
-
   if [ "$no_pass" = true ]; then
-    openssl genrsa -out avb.pem $rsa
+    openssl genrsa -out avb.pem 4096
   else
-    openssl genrsa $rsa | openssl pkcs8 -topk8 -scrypt -out avb.pem
+    openssl genrsa 4096 | openssl pkcs8 -topk8 -scrypt -out avb.pem
   fi
   ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
 else
