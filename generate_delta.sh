@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# Set bash options to stop the script if an error occurs and to treat unset variables as errors
-set -o errexit -o nounset -o pipefail
+# Enable strict error checking and exit on error or pipe failure
+set -o errexit -o pipefail
 
 # Function to print an error message and exit the script with an error code
-user_error() {
+print_error() {
     echo "$1" >&2
     exit 1
 }
 
-# Get the directory of the script and save it in the $dir variable
+# Get the directory containing this script
 dir="$(dirname "$(realpath "$0")")"
 
 # Check if the script was called with three arguments (device name, old target zip, and new target zip)
-[[ $# -eq 3 ]] || user_error "expected 3 arguments (device, old_target.zip, new_target.zip)"
+[[ $# -eq 3 ]] || print_error "expected 3 arguments (device, old_target.zip, new_target.zip)"
 
 # Set the scheduling policy for the current process to 'batch'
 chrt -b -p 0 $$
@@ -27,26 +27,35 @@ fi
 
 # Save the device name, old target zip, and new target zip arguments in variables
 DEVICE=$1
-OLDZIP=$2
-NEWZIP=$3
-OTADIR=${NEWZIP%/*}
+OLD_TARGET_ZIP=$(realpath "$2")
+NEW_TARGET_ZIP=$(realpath "$3")
+NEW_TARGET_DIR=${NEW_TARGET_ZIP%/*}
 
-# Create a temporary directory for the decrypted keys and set a trap to delete it when the script exits
-KEY_DIR=$(mktemp -d --tmpdir delta_keys.XXXXXXXXXX)
-trap 'rm -rf \"$KEY_DIR\"' EXIT
-
-# Copy the keys from the persistent key directory to the temporary key directory and decrypt them
+# Decrypt the keys in advance for improved performance and modern algorithm support
+# Copy the keys to a temporary directory and remove it when the script exits.
+KEY_DIR=$(mktemp -d /dev/shm/release_keys.XXXXXXXXXX)
 cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR"
-"$dir"/script/decrypt_keys.sh "$KEY_DIR"
+"$dir"/decrypt_keys.sh "$KEY_DIR"
+
+# Unzip the OTA tools into the output directory and remove it when the script exits.
+if [ -f "$NEW_TARGET_DIR/otatools.zip" ]; then
+    unzip -o "$NEW_TARGET_DIR/otatools.zip" -d "$NEW_TARGET_DIR/otatools" || exit 1
+    cd "$NEW_TARGET_DIR/otatools"
+else
+    print_error "Can't find otatools.zip in $NEW_TARGET_DIR"
+fi
 
 # Set the path to the build tools and path tools directories
 export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
 export PATH="$PWD/prebuilts/build-tools/path/linux-x86:$PATH"
+export PATH="$NEW_TARGET_DIR/otatools/bin:$PATH"
 
 # Extract the build numbers from the old and new target zips
-OLD_BUILDNO=$(basename "$OLDZIP" | sed -e s/[^0-9]//g)
-NEW_BUILDNO=$(basename "$NEWZIP" | sed -e s/[^0-9]//g)
+BUILD_NUMBER=$(basename "${OLD_TARGET_ZIP%%.*}" | cut -d'-' -f3)-$(basename "${NEW_TARGET_ZIP%%.*}" | cut -d'-' -f3)
 
 # Create the incremental OTA package
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
-    -i "$OLDZIP" "$NEWZIP" "$OTADIR/lineage_$DEVICE-incremental-$OLD_BUILDNO-$NEW_BUILDNO.zip"
+    -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$NEW_TARGET_DIR/lineage_$DEVICE-incremental-$BUILD_NUMBER.zip"
+
+cd "$NEW_TARGET_DIR"
+rm -rf "$KEY_DIR" "$NEW_TARGET_DIR/otatools"
