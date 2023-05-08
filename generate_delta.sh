@@ -18,10 +18,11 @@ dir="$(dirname "$(realpath "$0")")"
 # Set the scheduling policy for the current process to 'batch'
 chrt -b -p 0 $$
 
-# Set the common key directory and persistent key directory based on the device name argument
-COMMON_KEY_DIR=keys/common
-PERSISTENT_KEY_DIR=keys/$1
-if [ -d COMMON_KEY_DIR ]; then
+# Set the paths to the directories containing the keys
+COMMON_KEY_DIR=$PWD/keys/common
+PERSISTENT_KEY_DIR=$PWD/keys/$1
+# Use common keys if it exists
+if [ -d $COMMON_KEY_DIR ]; then
     PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
 fi
 
@@ -33,8 +34,8 @@ NEW_TARGET_DIR=${NEW_TARGET_ZIP%/*}
 
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
-KEY_DIR=$(mktemp -d /dev/shm/release_keys.XXXXXXXXXX)
-cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR"
+KEY_DIR="$NEW_TARGET_DIR/keys"
+cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 "$dir"/decrypt_keys.sh "$KEY_DIR"
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.

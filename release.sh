@@ -33,15 +33,15 @@ fi
 # Set the output directory for the release artifacts
 RELEASE_OUT=$PWD/out/release-$1-$BUILD_NUMBER
 
-# Decrypt the keys in advance for improved performance and modern algorithm support
-# Copy the keys to a temporary directory and remove it when the script exits.
-KEY_DIR=$(mktemp -d /dev/shm/release_keys.XXXXXXXXXX)
-cp "$PERSISTENT_KEY_DIR"/* "$KEY_DIR"
-"$dir"/decrypt_keys.sh "$KEY_DIR"
-
 # Remove any previous release output and create the release output directory.
 rm -rf "$RELEASE_OUT" || exit 1
 mkdir -p "$RELEASE_OUT" || exit 1
+
+# Decrypt the keys in advance for improved performance and modern algorithm support
+# Copy the keys to a temporary directory and remove it when the script exits.
+KEY_DIR="$RELEASE_OUT/keys"
+cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
+"$dir"/decrypt_keys.sh "$KEY_DIR"
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.
 cp "$OUT/otatools.zip" "$RELEASE_OUT/otatools.zip"
