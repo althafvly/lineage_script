@@ -15,9 +15,13 @@ dir="$(dirname "$(realpath "$0")")"
 # Make sure we have exactly one command-line argument (device type)
 [[ $# -eq 1 ]] || print_error "Expected a single argument (device type)"
 
-# Make sure the BUILD_NUMBER and OUT environment variables are set
+# Extract the build ID from the build/make/core/build_id.mk file
+build_id=$(grep -o 'BUILD_ID=.*' "$dir"/../build/make/core/build_id.mk | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
+
+# Make sure the BUILD_NUMBER and OUT environment variables are set. Also build_id is not empty
 [[ -n $BUILD_NUMBER ]] || print_error "Expected BUILD_NUMBER in the environment"
 [[ -n $OUT ]] || print_error "Expected OUT in the environment"
+[[ -n $build_id ]] || print_error "Run this script in root dir also make sure cloned in [LINEAGEOS_ROOT]/script"
 
 # Set the scheduling policy of this script to "batch" for better performance
 chrt -b -p 0 $$
@@ -41,7 +45,7 @@ mkdir -p "$RELEASE_OUT" || exit 1
 # Copy the keys to a temporary directory and remove it when the script exits.
 KEY_DIR="$RELEASE_OUT/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
-"$dir"/decrypt_keys.sh "$KEY_DIR"
+"$dir"/crypt_keys.sh -d "$KEY_DIR"
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.
 cp "$OUT/otatools.zip" "$RELEASE_OUT/otatools.zip"
@@ -72,9 +76,6 @@ elif [ -f "$KEY_DIR"/verity.x509.pem ]; then
       --replace_verity_private_key "$KEY_DIR/verity" \
       --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
 fi
-
-# Extract the build ID from the build/make/core/build_id.mk file
-build_id=$(grep -o 'BUILD_ID=.*' "$dir"/../build/make/core/build_id.mk | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
 
 # Check if avb.pem exists or verity.x509.pem exists, Sign the target files apks
 # If the build ID is one of 's', or 't', or older and run the appropriate commands for that build
