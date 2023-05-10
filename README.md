@@ -59,7 +59,21 @@
     out/release-alioth-$OLD_BUILD_NUMBER/lineage_alioth-target_files-$OLD_BUILD_NUMBER.zip \
     out/release-alioth-$NEW_BUILD_NUMBER/lineage_alioth-target_files-$NEW_BUILD_NUMBER.zip
     ```
+
 Note:
 
- - The build out directory is out/release-alioth-$BUILD_NUMBER
+- The build out directory is out/release-alioth-$BUILD_NUMBER
 - The build out for delta is out/release-alioth-$NEW_BUILD_NUMBER
+- Flashing avb_custom_key for AVB-1.0+ (Flash OTA or factory image afterwards)
+    ```
+    fastboot erase avb_custom_key
+    fastboot flash avb_custom_key keys/alioth/avb_pkmd.bin
+    ```
+- To Lock bootloader  AVB-1.0+
+    ```
+    fastboot flashing lock
+    ```
+    To Lock bootloader  AVB-1.0
+    ```
+    fastboot oem lock
+    ```
