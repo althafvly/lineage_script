@@ -36,7 +36,7 @@ NEW_TARGET_DIR=${NEW_TARGET_ZIP%/*}
 # Copy the keys to a temporary directory and remove it when the script exits.
 KEY_DIR="$NEW_TARGET_DIR/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
-"$dir"/decrypt_keys.sh "$KEY_DIR"
+"$dir"/crypt_keys.sh -d "$KEY_DIR"
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.
 if [ -f "$NEW_TARGET_DIR/otatools.zip" ]; then
