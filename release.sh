@@ -30,7 +30,7 @@ chrt -b -p 0 $$
 COMMON_KEY_DIR=$PWD/keys/common
 PERSISTENT_KEY_DIR=$PWD/keys/$1
 # Use common keys if it exists
-if [ -d $COMMON_KEY_DIR ]; then
+if [ -d "$COMMON_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
 fi
 
@@ -63,13 +63,64 @@ DEVICE=$1
 # Set the target files name
 TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
 
+APEX_PACKAGE_LIST=(
+  "com.android.adbd"
+  "com.android.adservices"
+  "com.android.adservices.api"
+  "com.android.appsearch"
+  "com.android.art"
+  "com.android.bluetooth"
+  "com.android.btservices"
+  "com.android.cellbroadcast"
+  "com.android.compos"
+  "com.android.connectivity.resources"
+  "com.android.conscrypt"
+  "com.android.extservices"
+  "com.android.hotspot2.osulogin"
+  "com.android.i18n"
+  "com.android.ipsec"
+  "com.android.media"
+  "com.android.media.swcodec"
+  "com.android.mediaprovider"
+  "com.android.nearby.halfsheet"
+  "com.android.neuralnetworks"
+  "com.android.ondevicepersonalization"
+  "com.android.os.statsd"
+  "com.android.permission"
+  "com.android.resolv"
+  "com.android.runtime"
+  "com.android.safetycenter.resources"
+  "com.android.scheduling"
+  "com.android.sdkext"
+  "com.android.support.apexer"
+  "com.android.telephony"
+  "com.android.tethering"
+  "com.android.tzdata"
+  "com.android.uwb"
+  "com.android.uwb.resources"
+  "com.android.virt"
+  "com.android.vndk.current"
+  "com.android.wifi"
+  "com.android.wifi.dialog"
+  "com.android.wifi.resources"
+  "com.google.pixel.camera.hal"
+  "com.qorvo.uwb"
+)
+
+PACKAGE_LIST=(
+  "OsuLogin"
+  "ServiceWifiResources"
+)
+
 # Check if avb.pem exists and set avb algorithm
 # Set VERITY_SWITCHES based on the presence of avb.pem or verity.x509.pem.
 AVB_ALGORITHM=SHA256_RSA4096
 if [ -f "$KEY_DIR"/avb.pem ]; then
   [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
-  VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM" \
-      --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM")
+  VERITY_SWITCHES=( --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM" )
+  if [[ "$build_id" != [st] ]]; then
+      VERITY_SWITCHES+=( --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM" )
+  fi
 # Check if verity.x509.pem exists and sign target files apks with verity
 elif [ -f "$KEY_DIR"/verity.x509.pem ]; then
   VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub" \
@@ -77,161 +128,37 @@ elif [ -f "$KEY_DIR"/verity.x509.pem ]; then
       --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
 fi
 
-# Check if avb.pem exists or verity.x509.pem exists, Sign the target files apks
-# If the build ID is one of 's', or 't', or older and run the appropriate commands for that build
-if [[ "$build_id" == [t] ]]; then
-    if [ -f $KEY_DIR/avb.pem ]; then
-        sign_target_files_apks -o -d "$KEY_DIR" --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm $AVB_ALGORITHM \
-            --extra_apks AdServicesApk.apk="$KEY_DIR/releasekey" \
-            --extra_apks Bluetooth.apk="$KEY_DIR/bluetooth" \
-            --extra_apks HalfSheetUX.apk="$KEY_DIR/releasekey" \
-            --extra_apks OsuLogin.apk="$KEY_DIR/releasekey" \
-            --extra_apks SafetyCenterResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks ServiceConnectivityResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks ServiceUwbResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks ServiceWifiResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks WifiDialog.apk="$KEY_DIR/releasekey" \
-            --extra_apks com.android.adbd.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.adbd.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.apex.cts.shim.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.apex.cts.shim.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.appsearch.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.appsearch.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.art.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.art.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.art.debug.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.art.debug.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.cellbroadcast.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.cellbroadcast.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.conscrypt.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.conscrypt.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.extservices.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.extservices.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.i18n.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.i18n.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.ipsec.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.ipsec.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.media.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.media.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.media.swcodec.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.media.swcodec.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.mediaprovider.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.mediaprovider.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.neuralnetworks.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.neuralnetworks.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.os.statsd.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.os.statsd.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.permission.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.permission.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.resolv.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.resolv.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.runtime.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.runtime.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.scheduling.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.scheduling.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.sdkext.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.sdkext.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.tethering.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.tethering.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.tzdata.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.tzdata.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.vndk.current.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.vndk.current.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.wifi.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.wifi.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.google.pixel.camera.hal.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.google.pixel.camera.hal.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.adservices.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.adservices.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.btservices.apex="$KEY_DIR/bluetooth" \
-            --extra_apex_payload_key com.android.btservices.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.compos.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.compos.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.ondevicepersonalization.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.ondevicepersonalization.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.uwb.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.uwb.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.virt.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.virt.apex="$KEY_DIR/avb.pem" \
-            "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $RELEASE_OUT/$TARGET_FILES
-    elif [ -f $KEY_DIR/verity.x509.pem ]; then
-        sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
-            --extra_apks AdServicesApk.apk="$KEY_DIR/releasekey" \
-            --extra_apks Bluetooth.apk="$KEY_DIR/bluetooth" \
-            --extra_apks HalfSheetUX.apk="$KEY_DIR/releasekey" \
-            --extra_apks OsuLogin.apk="$KEY_DIR/releasekey" \
-            --extra_apks SafetyCenterResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks ServiceConnectivityResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks ServiceUwbResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks ServiceWifiResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks WifiDialog.apk="$KEY_DIR/releasekey" \
-            "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $RELEASE_OUT/$TARGET_FILES
+SIGN_TARGETS=( -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" )
+
+# If the build ID is one of 's', or 't' and add the appropriate commands for signing
+if [[ "$build_id" == [st] ]]; then
+    PACKAGE_LIST+=(
+      "HalfSheetUX"
+      "SafetyCenterResources"
+      "ServiceConnectivityResources"
+      "ServiceUwbResources"
+      "WifiDialog"
+    )
+
+    if [ -f "$KEY_DIR/avb.pem" ]; then
+        for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
+            if [ -f "$KEY_DIR/$PACKAGE" ] && [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
+                SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE" \
+                --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem" )
+            else
+                SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey" \
+                --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem" )
+            fi
+        done
     fi
-elif [[ "$build_id" == [s] ]]; then
-    if [ -f $KEY_DIR/avb.pem ]; then
-        sign_target_files_apks -o -d "$KEY_DIR" --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm $AVB_ALGORITHM \
-            --extra_apks OsuLogin.apk,ServiceConnectivityResources.apk,ServiceWifiResources.apk="$KEY_DIR/releasekey" \
-            --extra_apks com.android.adbd.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.adbd.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.apex.cts.shim.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.apex.cts.shim.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.appsearch.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.appsearch.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.art.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.art.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.art.debug.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.art.debug.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.cellbroadcast.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.cellbroadcast.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.conscrypt.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.conscrypt.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.extservices.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.extservices.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.i18n.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.i18n.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.ipsec.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.ipsec.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.media.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.media.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.media.swcodec.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.media.swcodec.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.mediaprovider.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.mediaprovider.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.neuralnetworks.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.neuralnetworks.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.os.statsd.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.os.statsd.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.permission.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.permission.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.resolv.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.resolv.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.runtime.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.runtime.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.scheduling.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.scheduling.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.sdkext.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.sdkext.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.tethering.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.tethering.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.tzdata.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.tzdata.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.vndk.current.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.vndk.current.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.android.wifi.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.android.wifi.apex="$KEY_DIR/avb.pem" \
-            --extra_apks com.google.pixel.camera.hal.apex="$KEY_DIR/releasekey" \
-            --extra_apex_payload_key com.google.pixel.camera.hal.apex="$KEY_DIR/avb.pem" \
-            "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $RELEASE_OUT/$TARGET_FILES
-    elif [ -f $KEY_DIR/verity.x509.pem ]; then
-        sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
-            --extra_apks OsuLogin.apk,ServiceConnectivityResources.apk,ServiceWifiResources.apk="$KEY_DIR/releasekey" \
-            "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $RELEASE_OUT/$TARGET_FILES
-    fi
-else
-    sign_target_files_apks -o -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" \
-        --extra_apks OsuLogin.apk,ServiceWifiResources.apk="$KEY_DIR/releasekey" \
-        "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" $RELEASE_OUT/$TARGET_FILES
 fi
+
+for PACKAGE in "${PACKAGE_LIST[@]}"; do
+    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
+done
+
+sign_target_files_apks -o "${SIGN_TARGETS[@]}" \
+    "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" "$RELEASE_OUT/$TARGET_FILES"
 
 if [[ "$build_id" == [t] ]]; then
   LINEAGE_VER=20.0
@@ -261,6 +188,7 @@ img_from_target_files "$RELEASE_OUT/$TARGET_FILES" "$RELEASE_OUT/$FASTBOOT_PACKA
 for i in "${!IMAGES[@]}"; do
     if unzip -l "$RELEASE_OUT/$FASTBOOT_PACKAGE" | grep -q "${IMAGES[i]}.img"; then
         unzip -j -q "$RELEASE_OUT/$FASTBOOT_PACKAGE" "${IMAGES[i]}.img" -d "$RELEASE_OUT"
+        mv "$RELEASE_OUT/${IMAGES[i]}.img" "$RELEASE_OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-${IMAGES[i]}-$DEVICE.img"
     fi
 done
 
