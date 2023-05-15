@@ -107,11 +107,6 @@ APEX_PACKAGE_LIST=(
   "com.qorvo.uwb"
 )
 
-PACKAGE_LIST=(
-  "OsuLogin"
-  "ServiceWifiResources"
-)
-
 # Check if avb.pem exists and set avb algorithm
 # Set VERITY_SWITCHES based on the presence of avb.pem or verity.x509.pem.
 AVB_ALGORITHM=SHA256_RSA4096
@@ -130,15 +125,23 @@ fi
 
 SIGN_TARGETS=( -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" )
 
-# If the build ID is one of 's', or 't' and add the appropriate commands for signing
-if [[ "$build_id" == [st] ]]; then
+if [[ "$build_id" == [rst] ]]; then
+  PACKAGE_LIST=(
+    "OsuLogin"
+    "ServiceWifiResources"
+  )
+  if [[ "$build_id" == [st] ]]; then
     PACKAGE_LIST+=(
-      "HalfSheetUX"
-      "SafetyCenterResources"
       "ServiceConnectivityResources"
-      "ServiceUwbResources"
-      "WifiDialog"
     )
+    if [[ "$build_id" == [t] ]]; then
+      PACKAGE_LIST+=(
+        "HalfSheetUX"
+        "SafetyCenterResources"
+        "ServiceUwbResources"
+        "WifiDialog"
+      )
+    fi
 
     if [ -f "$KEY_DIR/avb.pem" ]; then
         for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
@@ -151,11 +154,12 @@ if [[ "$build_id" == [st] ]]; then
             fi
         done
     fi
-fi
+  fi  
 
-for PACKAGE in "${PACKAGE_LIST[@]}"; do
-    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
-done
+  for PACKAGE in "${PACKAGE_LIST[@]}"; do
+      SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
+  done
+fi
 
 sign_target_files_apks -o "${SIGN_TARGETS[@]}" \
     "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" "$RELEASE_OUT/$TARGET_FILES"
