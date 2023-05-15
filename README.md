@@ -27,8 +27,8 @@
     ```
     - Run the generate_keys.sh script to generate the keys:
     ```
-    Usage: generate_keys.sh [-a] [-n] [-h]
-      -a   Optionally generate apex certs
+    Usage: generate_keys.sh [-a] [-n] [-v] [-h]
+      -a   Generate apex certs
       -n   Do not prompt for password
       -v   Generate AVB certificate
       -h   Display this help message

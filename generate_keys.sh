@@ -8,8 +8,8 @@ no_pass=false
 while getopts ":hanv" opt; do
   case ${opt} in
     h )
-      echo "Usage: script.sh [-a] [-n] [-v] [-h]"
-      echo "  -a   Optionally generate apex certs"
+      echo "Usage: generate_keys.sh [-a] [-n] [-v] [-h]"
+      echo "  -a   Generate apex certs"
       echo "  -n   Do not prompt for password"
       echo "  -v   Generate AVB certificate"
       echo "  -h   Display this help message"
@@ -42,7 +42,7 @@ dir="$(dirname "$(realpath "$0")")"
 subject='/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=LineageOS/emailAddress=android@android.com'
 
 # Specify the certs to generate
-common="releasekey platform shared media networkstack verity bluetooth sdk_sandbox "
+common="releasekey platform shared media networkstack verity bluetooth sdk_sandbox"
 apex_packages="com.android.adbd \
 com.android.apex.cts.shim \
 com.android.adservices \
@@ -89,7 +89,7 @@ com.qorvo.uwb"
 
 # Optionally generate apex
 if [ "$apex" = true ]; then
-  common+=$apex_packages
+  common=$apex_packages
 fi
 
 if [ "$avb" = true ]; then
@@ -104,5 +104,12 @@ else
   echo "Note: Use same password for all certificates you generate"
   for cert in $common; do \
       no_password=$no_pass "$dir"/make_key.sh "$cert" "$subject"
+      if [ "$apex" = true ]; then
+          if [ "$no_pass" = true ]; then
+              openssl pkcs8 -in $cert.pk8 -inform DER -out $cert.pem -nocrypt
+          else
+              openssl pkcs8 -in $cert.pk8 -inform DER -out $cert.pem
+          fi
+      fi
   done
 fi
