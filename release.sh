@@ -21,12 +21,17 @@ else
     DEVICE=$(echo "$TARGET_PRODUCT" | cut -d '_' -f 2-)
 fi
 
-# Extract the build ID from the build/make/core/build_id.mk file
-build_id=$(grep -o 'BUILD_ID=.*' "$dir"/../build/make/core/build_id.mk | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
-
-# Make sure the BUILD_NUMBER and OUT environment variables are set. Also build_id is not empty
-[[ -n $BUILD_NUMBER ]] || print_error "Expected BUILD_NUMBER in the environment"
+# Make sure the OUT environment variable set.
 [[ -n $OUT ]] || print_error "Expected OUT in the environment"
+
+# Get ROM root directory from OUT
+ROM_ROOT="${OUT%\/out/*}"
+
+# Extract the build ID from the build/make/core/build_id.mk file
+build_id=$(grep -o 'BUILD_ID=.*' "$ROM_ROOT/build/make/core/build_id.mk" | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
+
+# Make sure the BUILD_NUMBER environment variable set. Also build_id is not empty
+[[ -n $BUILD_NUMBER ]] || print_error "Expected BUILD_NUMBER in the environment"
 [[ -n $build_id ]] || print_error "Run this script in root dir also make sure cloned in [LINEAGEOS_ROOT]/script"
 
 # Set the scheduling policy of this script to "batch" for better performance
