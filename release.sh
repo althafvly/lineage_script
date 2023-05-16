@@ -38,15 +38,15 @@ build_id=$(grep -o 'BUILD_ID=.*' "$ROM_ROOT/build/make/core/build_id.mk" | cut -
 chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
-COMMON_KEY_DIR=$PWD/keys/common
-PERSISTENT_KEY_DIR=$PWD/keys/$1
+COMMON_KEY_DIR=$ROM_ROOT/keys/common
+PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$1
 # Use common keys if it exists
 if [ -d "$COMMON_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
 fi
 
 # Set the output directory for the release artifacts
-RELEASE_OUT=$PWD/out/release-$1-$BUILD_NUMBER
+RELEASE_OUT=$ROM_ROOT/out/release-$1-$BUILD_NUMBER
 
 # Remove any previous release output and create the release output directory.
 rm -rf "$RELEASE_OUT" || exit 1
@@ -64,8 +64,8 @@ unzip "$RELEASE_OUT/otatools.zip" -d "$RELEASE_OUT/otatools" || exit 1
 cd "$RELEASE_OUT/otatools"
 
 # Add the OTA tools to the PATH
-export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
-export PATH="$PWD/prebuilts/build-tools/path/linux-x86:$PATH"
+export PATH="$ROM_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
+export PATH="$ROM_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
 export PATH="$RELEASE_OUT/otatools/bin:$PATH"
 
 # Set the target files name
