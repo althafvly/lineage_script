@@ -12,8 +12,14 @@ print_error() {
 # Get the directory containing this script
 dir="$(dirname "$(realpath "$0")")"
 
-# Make sure we have exactly one command-line argument (device type)
-[[ $# -eq 1 ]] || print_error "Expected a single argument (device type)"
+# Set the device type
+if [ -z "$TARGET_PRODUCT" ]; then
+    # Make sure we have exactly one command-line argument (device type)
+    [[ $# -eq 1 ]] || print_error "Expected a single argument (device type)"
+    DEVICE=$1
+else
+    DEVICE=$(echo "$TARGET_PRODUCT" | cut -d '_' -f 2-)
+fi
 
 # Extract the build ID from the build/make/core/build_id.mk file
 build_id=$(grep -o 'BUILD_ID=.*' "$dir"/../build/make/core/build_id.mk | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
@@ -56,9 +62,6 @@ cd "$RELEASE_OUT/otatools"
 export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
 export PATH="$PWD/prebuilts/build-tools/path/linux-x86:$PATH"
 export PATH="$RELEASE_OUT/otatools/bin:$PATH"
-
-# Set the device type
-DEVICE=$1
 
 # Set the target files name
 TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
