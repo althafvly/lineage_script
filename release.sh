@@ -136,6 +136,7 @@ if [[ "$build_id" == [rst] ]]; then
     )
     if [[ "$build_id" == [t] ]]; then
       PACKAGE_LIST+=(
+        "AdServicesApk"
         "HalfSheetUX"
         "SafetyCenterResources"
         "ServiceUwbResources"
