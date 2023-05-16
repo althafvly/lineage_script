@@ -64,123 +64,123 @@ DEVICE=$1
 TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
 
 APEX_PACKAGE_LIST=(
-  "com.android.adbd"
-  "com.android.adservices"
-  "com.android.adservices.api"
-  "com.android.appsearch"
-  "com.android.art"
-  "com.android.bluetooth"
-  "com.android.btservices"
-  "com.android.cellbroadcast"
-  "com.android.compos"
-  "com.android.connectivity.resources"
-  "com.android.conscrypt"
-  "com.android.extservices"
-  "com.android.hotspot2.osulogin"
-  "com.android.i18n"
-  "com.android.ipsec"
-  "com.android.media"
-  "com.android.media.swcodec"
-  "com.android.mediaprovider"
-  "com.android.nearby.halfsheet"
-  "com.android.neuralnetworks"
-  "com.android.ondevicepersonalization"
-  "com.android.os.statsd"
-  "com.android.permission"
-  "com.android.resolv"
-  "com.android.runtime"
-  "com.android.safetycenter.resources"
-  "com.android.scheduling"
-  "com.android.sdkext"
-  "com.android.support.apexer"
-  "com.android.telephony"
-  "com.android.tethering"
-  "com.android.tzdata"
-  "com.android.uwb"
-  "com.android.uwb.resources"
-  "com.android.virt"
-  "com.android.vndk.current"
-  "com.android.wifi"
-  "com.android.wifi.dialog"
-  "com.android.wifi.resources"
-  "com.google.pixel.camera.hal"
-  "com.qorvo.uwb"
+    "com.android.adbd"
+    "com.android.adservices"
+    "com.android.adservices.api"
+    "com.android.appsearch"
+    "com.android.art"
+    "com.android.bluetooth"
+    "com.android.btservices"
+    "com.android.cellbroadcast"
+    "com.android.compos"
+    "com.android.connectivity.resources"
+    "com.android.conscrypt"
+    "com.android.extservices"
+    "com.android.hotspot2.osulogin"
+    "com.android.i18n"
+    "com.android.ipsec"
+    "com.android.media"
+    "com.android.media.swcodec"
+    "com.android.mediaprovider"
+    "com.android.nearby.halfsheet"
+    "com.android.neuralnetworks"
+    "com.android.ondevicepersonalization"
+    "com.android.os.statsd"
+    "com.android.permission"
+    "com.android.resolv"
+    "com.android.runtime"
+    "com.android.safetycenter.resources"
+    "com.android.scheduling"
+    "com.android.sdkext"
+    "com.android.support.apexer"
+    "com.android.telephony"
+    "com.android.tethering"
+    "com.android.tzdata"
+    "com.android.uwb"
+    "com.android.uwb.resources"
+    "com.android.virt"
+    "com.android.vndk.current"
+    "com.android.wifi"
+    "com.android.wifi.dialog"
+    "com.android.wifi.resources"
+    "com.google.pixel.camera.hal"
+    "com.qorvo.uwb"
 )
+
+if [[ "$build_id" == [t] ]]; then
+    LINEAGE_VER=20.0
+elif [[ "$build_id" == [s] ]]; then
+    LINEAGE_VER=19.1
+elif [[ "$build_id" == [r] ]]; then
+    LINEAGE_VER=18.1
+elif [[ "$build_id" == [q] ]]; then
+    LINEAGE_VER=17.1
+elif [[ "$build_id" == [p] ]]; then
+    LINEAGE_VER=16.0
+elif [[ "$build_id" == [o] ]]; then
+    LINEAGE_VER=15.1
+else
+    # default value if none of the above conditions are met
+    LINEAGE_VER=14.1
+fi
 
 # Check if avb.pem exists and set avb algorithm
 # Set VERITY_SWITCHES based on the presence of avb.pem or verity.x509.pem.
 AVB_ALGORITHM=SHA256_RSA4096
 if [ -f "$KEY_DIR"/avb.pem ]; then
-  [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
-  VERITY_SWITCHES=( --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM" )
-  if [[ "$build_id" != [st] ]]; then
-      VERITY_SWITCHES+=( --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM" )
-  fi
+    [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
+    VERITY_SWITCHES=( --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM" )
+    if [[ "$build_id" != [st] ]]; then
+        VERITY_SWITCHES+=( --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM" )
+    fi
 # Check if verity.x509.pem exists and sign target files apks with verity
 elif [ -f "$KEY_DIR"/verity.x509.pem ]; then
-  VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub" \
-      --replace_verity_private_key "$KEY_DIR/verity" \
-      --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
+    VERITY_SWITCHES=( --replace_verity_public_key "$KEY_DIR/verity_key.pub"
+        --replace_verity_private_key "$KEY_DIR/verity"
+        --replace_verity_keyid "$KEY_DIR/verity.x509.pem" )
 fi
 
-SIGN_TARGETS=( -d "$KEY_DIR" "${VERITY_SWITCHES[@]}" )
+SIGN_TARGETS=( "${VERITY_SWITCHES[@]}" )
 
 if [[ "$build_id" == [rst] ]]; then
-  PACKAGE_LIST=(
-    "OsuLogin"
-    "ServiceWifiResources"
-  )
-  if [[ "$build_id" == [st] ]]; then
-    PACKAGE_LIST+=(
-      "ServiceConnectivityResources"
+    PACKAGE_LIST=(
+        "OsuLogin"
+        "ServiceWifiResources"
     )
-    if [[ "$build_id" == [t] ]]; then
-      PACKAGE_LIST+=(
-        "AdServicesApk"
-        "HalfSheetUX"
-        "SafetyCenterResources"
-        "ServiceUwbResources"
-        "WifiDialog"
-      )
+    if [[ "$build_id" == [st] ]]; then
+        PACKAGE_LIST+=(
+            "ServiceConnectivityResources"
+        )
+        if [[ "$build_id" == [t] ]]; then
+            PACKAGE_LIST+=(
+                "AdServicesApk"
+                "HalfSheetUX"
+                "SafetyCenterResources"
+                "ServiceUwbResources"
+                "WifiDialog"
+            )
+        fi
+
+        if [ -f "$KEY_DIR/avb.pem" ]; then
+            for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
+                if [ -f "$KEY_DIR/$PACKAGE" ] && [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
+                    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
+                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem" )
+                else
+                    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem" )
+                fi
+            done
+        fi
     fi
 
-    if [ -f "$KEY_DIR/avb.pem" ]; then
-        for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
-            if [ -f "$KEY_DIR/$PACKAGE" ] && [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
-                SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE" \
-                --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem" )
-            else
-                SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey" \
-                --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem" )
-            fi
-        done
-    fi
-  fi  
-
-  for PACKAGE in "${PACKAGE_LIST[@]}"; do
-      SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
-  done
+    for PACKAGE in "${PACKAGE_LIST[@]}"; do
+        SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
+    done
 fi
 
-sign_target_files_apks -o "${SIGN_TARGETS[@]}" \
+sign_target_files_apks -o -d "$KEY_DIR" "${SIGN_TARGETS[@]}" \
     "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" "$RELEASE_OUT/$TARGET_FILES"
-
-if [[ "$build_id" == [t] ]]; then
-  LINEAGE_VER=20.0
-elif [[ "$build_id" == [s] ]]; then
-  LINEAGE_VER=19.1
-elif [[ "$build_id" == [r] ]]; then
-  LINEAGE_VER=18.1
-elif [[ "$build_id" == [q] ]]; then
-  LINEAGE_VER=17.1
-elif [[ "$build_id" == [p] ]]; then
-  LINEAGE_VER=16.0
-elif [[ "$build_id" == [o] ]]; then
-  LINEAGE_VER=15.1
-else
-  # default value if none of the above conditions are met
-  LINEAGE_VER=14.1
-fi
 
 ota_from_target_files -k "$KEY_DIR/releasekey" "$RELEASE_OUT/$TARGET_FILES" \
     "$RELEASE_OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-ota_package-$DEVICE-signed.zip" || exit 1

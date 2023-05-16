@@ -13,28 +13,28 @@ encrypt=false
 decrypt=false
 
 while getopts "ed" opt; do
-  case $opt in
+    case $opt in
     e)
-      # Encoding option selected
-      encrypt=true
-      ;;
+        # Encoding option selected
+        encrypt=true
+        ;;
     d)
-      # Decoding option selected
-      decrypt=true
-      ;;
+        # Decoding option selected
+        decrypt=true
+        ;;
     \?)
-      # Invalid option selected
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-  esac
+        # Invalid option selected
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+    esac
 done
 
 if ! $encrypt && ! $decrypt; then
-  echo "Usage: $(basename "$0") [-e | -d] key_directory"
-  echo "  -e: Encrypt the keys"
-  echo "  -d: Decrypt the keys"
-  exit 1
+    echo "Usage: $(basename "$0") [-e | -d] key_directory"
+    echo "  -e: Encrypt the keys"
+    echo "  -d: Decrypt the keys"
+    exit 1
 fi
 
 # Shift the options so that $1 is the first argument after the options
@@ -56,7 +56,7 @@ echo
 # Export password for openssl to use
 export password
 
-if $encrypt ; then
+if $encrypt; then
     # Prompt user for old and new key passphrases
     read -r -p "Enter new key passphrase: " -s new_password
     echo
@@ -93,7 +93,7 @@ if $encrypt ; then
 
     # Unset new_password
     unset new_password
-elif $decrypt ; then
+elif $decrypt; then
     # Decrypt each key in the directory
     for key in releasekey platform shared media networkstack bluetooth sdk_sandbox verity; do
         if [[ -f $key.pk8 ]]; then
