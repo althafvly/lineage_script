@@ -39,14 +39,14 @@ chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
 COMMON_KEY_DIR=$ROM_ROOT/keys/common
-PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$1
+PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$DEVICE
 # Use common keys if it exists
 if [ -d "$COMMON_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
 fi
 
 # Set the output directory for the release artifacts
-RELEASE_OUT=$ROM_ROOT/out/release-$1-$BUILD_NUMBER
+RELEASE_OUT=$ROM_ROOT/out/release-$DEVICE-$BUILD_NUMBER
 
 # Remove any previous release output and create the release output directory.
 rm -rf "$RELEASE_OUT" || exit 1
