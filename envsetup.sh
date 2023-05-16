@@ -30,3 +30,9 @@ export DISPLAY_BUILD_NUMBER=true
 # set the build username and hostname to "lineageos"
 export BUILD_USERNAME=lineageos
 export BUILD_HOSTNAME=lineageos
+
+SCRIPT_DIR=$(gettop)/script
+
+function release() {
+    "$SCRIPT_DIR/release.sh" "$@"
+}
