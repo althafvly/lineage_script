@@ -18,12 +18,6 @@
    lunch lineage_alioth-user
    ```
 
-   - Generate the target files package, otatools package, and verity key using the following command:
-
-   ```
-   make target-files-package otatools-package generate_verity_key -j$(nproc --all)
-   ```
-
 3. Generate keys (Skip this step if you have already generated keys. Make sure they are in the keys directory).
 
    - Create a new folder for the keys:
@@ -56,6 +50,7 @@
    - For AVB-1.0 (e.g. marlin- Pixel XL), generate the keys using the following commands:
 
    ```
+   make generate_verity_key
    ../../out/host/linux-x86/bin/generate_verity_key -convert verity.x509.pem verity_key
    openssl x509 -outform der -in verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
    ```
@@ -66,11 +61,22 @@
    cd ../../
    ```
 
-4. Generate a signed build OTA and factory image using the following command:
+4. Generate the target files package, otatools package using the following command:
+   - Generate a signed build OTA and factory image using the following command:
    ```
+   make target-files-package otatools-package
    script/release.sh alioth
    ```
+   Or set this flag in lineage_alioth.mk
+   ```
+   DEFAULT_SYSTEM_DEV_CERTIFICATE := keys/alioth/releasekey
+   ```
+   - Generate a signed build OTA and factory image using the following command:
+   ```
+   make bacon updatepackage
+   ```
 5. (Optional) Generate delta packages (Incremental updates) using the following command:
+
    ```
    bash script/generate_delta.sh alioth \
    out/release-alioth-$OLD_BUILD_NUMBER/lineage_alioth-target_files-$OLD_BUILD_NUMBER.zip \
@@ -79,8 +85,14 @@
 
 Note:
 
-- The build out directory is out/release-alioth-$BUILD_NUMBER
-- The build out for delta is out/release-alioth-$NEW_BUILD_NUMBER
+- The build should be in any of these location after build.
+  - out/release-alioth-$BUILD_NUMBER
+  - out/target/product/alioth
+- The build out for delta is in
+  - out/release-alioth-$NEW_BUILD_NUMBER
+- Target file should be in any of these location after build.
+  - out/target/product/alioth/obj/PACKAGING/target_files_intermediates/lineage_alioth-target_files-$BUILD_NUMBER.zip
+  - out/release-alioth-$BUILD_NUMBER/lineage_alioth-target_files-$OLD_BUILD_NUMBER.zip
 - Flashing avb_custom_key for AVB-1.0+ (Flash OTA or factory image afterwards)
   ```
   fastboot erase avb_custom_key
