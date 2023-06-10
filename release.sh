@@ -58,10 +58,20 @@ KEY_DIR="$RELEASE_OUT/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 "$dir"/crypt_keys.sh -d "$KEY_DIR"
 
+# Define a function to delete temp directories
+cleanup() {
+  echo "Cleaning up..."
+  rm -rf "$KEY_DIR" "$RELEASE_OUT/otatools"
+  exit 1
+}
+
 # Unzip the OTA tools into the output directory and remove it when the script exits.
 cp "$OUT/otatools.zip" "$RELEASE_OUT/otatools.zip"
 unzip "$RELEASE_OUT/otatools.zip" -d "$RELEASE_OUT/otatools" || exit 1
 cd "$RELEASE_OUT/otatools"
+
+# Registering the cleanup function for script failure and interruption
+trap cleanup ERR SIGINT SIGTERM
 
 # Add the OTA tools to the PATH
 export PATH="$ROM_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
@@ -205,5 +215,4 @@ for i in "${!IMAGES[@]}"; do
     fi
 done
 
-cd "$RELEASE_OUT"
-rm -rf "$KEY_DIR" "$RELEASE_OUT/otatools"
+cleanup
