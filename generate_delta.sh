@@ -47,6 +47,13 @@ KEY_DIR="$NEW_TARGET_DIR/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 "$dir"/crypt_keys.sh -d "$KEY_DIR"
 
+# Define a function to delete temp directories
+cleanup() {
+  echo "Cleaning up..."
+  rm -rf "$KEY_DIR" "$NEW_TARGET_DIR/otatools"
+  exit 1
+}
+
 # Unzip the OTA tools into the output directory and remove it when the script exits.
 if [ -f "$NEW_TARGET_DIR/otatools.zip" ]; then
     unzip -o "$NEW_TARGET_DIR/otatools.zip" -d "$NEW_TARGET_DIR/otatools" || exit 1
@@ -54,6 +61,9 @@ if [ -f "$NEW_TARGET_DIR/otatools.zip" ]; then
 else
     print_error "Can't find otatools.zip in $NEW_TARGET_DIR"
 fi
+
+# Registering the cleanup function for script failure and interruption
+trap cleanup ERR SIGINT SIGTERM
 
 # Set the path to the build tools and path tools directories
 export PATH="$LOS_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
@@ -67,5 +77,4 @@ BUILD_NUMBER=$(basename "${OLD_TARGET_ZIP%%.*}" | cut -d'-' -f3)-$(basename "${N
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
     -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$NEW_TARGET_DIR/lineage_$DEVICE-incremental-$BUILD_NUMBER.zip"
 
-cd "$NEW_TARGET_DIR"
-rm -rf "$KEY_DIR" "$NEW_TARGET_DIR/otatools"
+cleanup
