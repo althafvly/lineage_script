@@ -31,6 +31,9 @@ export DISPLAY_BUILD_NUMBER=true
 export BUILD_USERNAME=lineageos
 export BUILD_HOSTNAME=lineageos
 
+# Export build root dir
+export LOS_ROOT=$PWD
+
 SCRIPT_DIR=$(gettop)/script
 
 function release() {

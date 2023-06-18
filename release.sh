@@ -38,11 +38,20 @@ build_id=$(grep -o 'BUILD_ID=.*' "$ROM_ROOT/build/make/core/build_id.mk" | cut -
 chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
-COMMON_KEY_DIR=$ROM_ROOT/keys/common
-PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$DEVICE
-# Use common keys if it exists
-if [ -d "$COMMON_KEY_DIR" ]; then
-    PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
+OLD_COMMON_KEY_DIR=$PWD/keys/common
+OLD_PERSISTENT_KEY_DIR=$PWD/keys/$1
+# Use common/device keys dir if it exists
+if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
+    PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
+elif [ -d "$OLD_COMMON_KEY_DIR" ]; then
+    PERSISTENT_KEY_DIR=$OLD_COMMON_KEY_DIR
+else
+    COMMON_KEY_DIR=~/.android-certs
+    PERSISTENT_KEY_DIR=~/.android-certs/$DEVICE
+    # Use common keys if device dir doesnt exists
+    if [ ! -d "$PERSISTENT_KEY_DIR" ]; then
+        PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
+    fi
 fi
 
 # Decrypt the keys in advance for improved performance and modern algorithm support
