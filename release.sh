@@ -24,11 +24,8 @@ fi
 # Make sure the OUT environment variable set.
 [[ -n $OUT ]] || print_error "Expected OUT in the environment"
 
-# Get ROM root directory from OUT
-ROM_ROOT="${OUT%\/out/*}"
-
 # Extract the build ID from the build/make/core/build_id.mk file
-build_id=$(grep -o 'BUILD_ID=.*' "$ROM_ROOT/build/make/core/build_id.mk" | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
+build_id=$(grep -o 'BUILD_ID=.*' "$LOS_ROOT/build/make/core/build_id.mk" | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
 
 # Make sure the BUILD_NUMBER environment variable set. Also build_id is not empty
 [[ -n $BUILD_NUMBER ]] || print_error "Expected BUILD_NUMBER in the environment"
@@ -38,8 +35,8 @@ build_id=$(grep -o 'BUILD_ID=.*' "$ROM_ROOT/build/make/core/build_id.mk" | cut -
 chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
-OLD_COMMON_KEY_DIR=$PWD/keys/common
-OLD_PERSISTENT_KEY_DIR=$PWD/keys/$1
+OLD_COMMON_KEY_DIR=$LOS_ROOT/keys/common
+OLD_PERSISTENT_KEY_DIR=$LOS_ROOT/keys/$1
 # Use common/device keys dir if it exists
 if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
@@ -75,8 +72,8 @@ cd "$OUT/otatools"
 trap cleanup ERR SIGINT SIGTERM
 
 # Add the OTA tools to the PATH
-export PATH="$ROM_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
-export PATH="$ROM_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
+export PATH="$LOS_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
+export PATH="$LOS_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
 export PATH="$OUT/otatools/bin:$PATH"
 
 # Set the target files name

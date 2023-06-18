@@ -19,8 +19,8 @@ dir="$(dirname "$(realpath "$0")")"
 chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
-OLD_COMMON_KEY_DIR=$PWD/keys/common
-OLD_PERSISTENT_KEY_DIR=$PWD/keys/$1
+OLD_COMMON_KEY_DIR=$LOS_ROOT/keys/common
+OLD_PERSISTENT_KEY_DIR=$LOS_ROOT/keys/$1
 # Use common/device keys dir if it exists
 if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
@@ -56,8 +56,8 @@ else
 fi
 
 # Set the path to the build tools and path tools directories
-export PATH="$PWD/prebuilts/build-tools/linux-x86/bin:$PATH"
-export PATH="$PWD/prebuilts/build-tools/path/linux-x86:$PATH"
+export PATH="$LOS_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
+export PATH="$LOS_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
 export PATH="$NEW_TARGET_DIR/otatools/bin:$PATH"
 
 # Extract the build numbers from the old and new target zips
