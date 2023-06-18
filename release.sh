@@ -45,30 +45,22 @@ if [ -d "$COMMON_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
 fi
 
-# Set the output directory for the release artifacts
-RELEASE_OUT=$ROM_ROOT/out/release-$DEVICE-$BUILD_NUMBER
-
-# Remove any previous release output and create the release output directory.
-rm -rf "$RELEASE_OUT" || exit 1
-mkdir -p "$RELEASE_OUT" || exit 1
-
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
-KEY_DIR="$RELEASE_OUT/keys"
+KEY_DIR="$OUT/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 "$dir"/crypt_keys.sh -d "$KEY_DIR"
 
 # Define a function to delete temp directories
 cleanup() {
   echo "Cleaning up..."
-  rm -rf "$KEY_DIR" "$RELEASE_OUT/otatools"
+  rm -rf "$KEY_DIR" "$OUT/otatools"
   exit 1
 }
 
 # Unzip the OTA tools into the output directory and remove it when the script exits.
-cp "$OUT/otatools.zip" "$RELEASE_OUT/otatools.zip"
-unzip "$RELEASE_OUT/otatools.zip" -d "$RELEASE_OUT/otatools" || exit 1
-cd "$RELEASE_OUT/otatools"
+unzip "$OUT/otatools.zip" -d "$OUT/otatools" || exit 1
+cd "$OUT/otatools"
 
 # Registering the cleanup function for script failure and interruption
 trap cleanup ERR SIGINT SIGTERM
@@ -76,7 +68,7 @@ trap cleanup ERR SIGINT SIGTERM
 # Add the OTA tools to the PATH
 export PATH="$ROM_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
 export PATH="$ROM_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
-export PATH="$RELEASE_OUT/otatools/bin:$PATH"
+export PATH="$OUT/otatools/bin:$PATH"
 
 # Set the target files name
 TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
@@ -198,20 +190,20 @@ if [[ "$build_id" == [rst] ]]; then
 fi
 
 sign_target_files_apks -o -d "$KEY_DIR" "${SIGN_TARGETS[@]}" \
-    "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" "$RELEASE_OUT/$TARGET_FILES"
+    "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" "$OUT/$TARGET_FILES"
 
-ota_from_target_files -k "$KEY_DIR/releasekey" "$RELEASE_OUT/$TARGET_FILES" \
-    "$RELEASE_OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-ota_package-$DEVICE-signed.zip" || exit 1
+ota_from_target_files -k "$KEY_DIR/releasekey" "$OUT/$TARGET_FILES" \
+    "$OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-ota_package-$DEVICE-signed.zip" || exit 1
 
 FASTBOOT_PACKAGE="lineage-$LINEAGE_VER-$BUILD_NUMBER-fastboot_package-$DEVICE.zip"
 IMAGES=("recovery" "boot" "vendor_boot" "dtbo")
 
-img_from_target_files "$RELEASE_OUT/$TARGET_FILES" "$RELEASE_OUT/$FASTBOOT_PACKAGE"
+img_from_target_files "$OUT/$TARGET_FILES" "$OUT/$FASTBOOT_PACKAGE"
 
 for i in "${!IMAGES[@]}"; do
-    if unzip -l "$RELEASE_OUT/$FASTBOOT_PACKAGE" | grep -q "${IMAGES[i]}.img"; then
-        unzip -j -q "$RELEASE_OUT/$FASTBOOT_PACKAGE" "${IMAGES[i]}.img" -d "$RELEASE_OUT"
-        mv "$RELEASE_OUT/${IMAGES[i]}.img" "$RELEASE_OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-${IMAGES[i]}-$DEVICE.img"
+    if unzip -l "$OUT/$FASTBOOT_PACKAGE" | grep -q "${IMAGES[i]}.img"; then
+        unzip -o -j -q "$OUT/$FASTBOOT_PACKAGE" "${IMAGES[i]}.img" -d "$OUT"
+        mv "$OUT/${IMAGES[i]}.img" "$OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-${IMAGES[i]}-$DEVICE.img"
     fi
 done
 
