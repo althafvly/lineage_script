@@ -55,7 +55,11 @@ fi
 
 if [ "${3}" = "rsa" ] || [ "$#" -eq 2 ]; then
     # Generate an RSA private key
-    (openssl genrsa -f4 4096 | tee "${one}" >"${two}") &
+    if [[ $1 == "verity" ]]; then
+        (openssl genrsa -f4 2048 | tee "${one}" >"${two}") &
+    else
+        (openssl genrsa -f4 4096 | tee "${one}" >"${two}") &
+    fi
     hash="-sha256"
 elif [ "${3}" = "ec" ]; then
     # Generate an EC private key
