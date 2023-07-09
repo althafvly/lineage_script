@@ -54,13 +54,15 @@ fi
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
 KEY_DIR="$OUT/keys"
-cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
-"$dir"/crypt_keys.sh -d "$KEY_DIR"
+if [ ! -d "$KEY_DIR" ]; then
+    cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
+    "$dir"/crypt_keys.sh -d "$KEY_DIR"
+fi
 
 # Define a function to delete temp directories
 cleanup() {
   echo "Cleaning up..."
-  rm -rf "$KEY_DIR" "$OUT/otatools"
+  rm -rf "$OUT/otatools"
   exit 1
 }
 
