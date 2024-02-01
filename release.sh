@@ -183,6 +183,7 @@ if [[ "$build_id" == [rst] ]]; then
         if [[ "$build_id" == [t] ]]; then
             PACKAGE_LIST+=(
                 "AdServicesApk"
+                "Bluetooth"
                 "HalfSheetUX"
                 "SafetyCenterResources"
                 "ServiceUwbResources"
@@ -192,7 +193,10 @@ if [[ "$build_id" == [rst] ]]; then
 
         if [ -f "$KEY_DIR/avb.pem" ]; then
             for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
-                if [ -f "$KEY_DIR/$PACKAGE" ] && [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
+                if [ "$PACKAGE" == "com.android.btservices" ] && [ -f "$KEY_DIR/bluetooth.x509.pem" ]; then
+                    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/bluetooth"
+                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem" )
+                elif [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
                     SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
                         --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem" )
                 else
@@ -204,7 +208,11 @@ if [[ "$build_id" == [rst] ]]; then
     fi
 
     for PACKAGE in "${PACKAGE_LIST[@]}"; do
-        SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
+        if [ "$PACKAGE" == "Bluetooth" ] && [ -f "$KEY_DIR/bluetooth.x509.pem" ]; then
+            SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/bluetooth" )
+        else
+            SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
+        fi
     done
 fi
 
