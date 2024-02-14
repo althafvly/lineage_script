@@ -59,25 +59,6 @@ if [ ! -d "$KEY_DIR" ]; then
     "$dir"/crypt_keys.sh -d "$KEY_DIR"
 fi
 
-# Define a function to delete temp directories
-cleanup() {
-  echo "Cleaning up..."
-  rm -rf "$OUT/otatools"
-  exit 1
-}
-
-# Unzip the OTA tools into the output directory and remove it when the script exits.
-unzip "$OUT/otatools.zip" -d "$OUT/otatools" || exit 1
-cd "$OUT/otatools"
-
-# Registering the cleanup function for script failure and interruption
-trap cleanup ERR SIGINT SIGTERM
-
-# Add the OTA tools to the PATH
-export PATH="$LOS_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
-export PATH="$LOS_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
-export PATH="$OUT/otatools/bin:$PATH"
-
 # Set the target files name
 TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
 
@@ -233,5 +214,3 @@ for i in "${!IMAGES[@]}"; do
         mv "$OUT/${IMAGES[i]}.img" "$OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-${IMAGES[i]}-$DEVICE.img"
     fi
 done
-
-cleanup

@@ -65,7 +65,7 @@
 4. Generate the target files package, otatools package using the following command:
    - Generate a signed build OTA and factory image using the following command:
    ```
-   make target-files-package otatools-package
+   make target-files-package otatools
    $LOS_ROOT/script/release.sh alioth
    ```
 5. (Optional) Generate delta packages (Incremental updates) using the following command:
