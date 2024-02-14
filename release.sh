@@ -130,7 +130,9 @@ LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
 # Set VERITY_SWITCHES based on the presence of avb.pem or verity.x509.pem.
 AVB_ALGORITHM=SHA256_RSA4096
 if [ -f "$KEY_DIR"/avb.pem ]; then
-    [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
+    if [ -f "$KEY_DIR"/avb_pkmd.bin ]; then
+        [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
+    fi
     VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM")
     if [[ "$build_id" != [st] ]]; then
         VERITY_SWITCHES+=(--avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM")
