@@ -115,42 +115,34 @@ APEX_PACKAGE_LIST=(
     "com.qorvo.uwb"
 )
 
-if [[ "$build_id" == [u] ]]; then
-    LINEAGE_VER=21.0
-elif [[ "$build_id" == [t] ]]; then
-    LINEAGE_VER=20.0
-elif [[ "$build_id" == [s] ]]; then
-    LINEAGE_VER=19.1
-elif [[ "$build_id" == [r] ]]; then
-    LINEAGE_VER=18.1
-elif [[ "$build_id" == [q] ]]; then
-    LINEAGE_VER=17.1
-elif [[ "$build_id" == [p] ]]; then
-    LINEAGE_VER=16.0
-elif [[ "$build_id" == [o] ]]; then
-    LINEAGE_VER=15.1
-else
-    # default value if none of the above conditions are met
-    LINEAGE_VER=14.1
+CONFIG_FILE="vendor/lineage/config/version.mk"
+if [ ! -f "$CONFIG_FILE" ]; then
+    # If version.mk doesn't exist, use common.mk
+    CONFIG_FILE="vendor/lineage/config/common.mk"
 fi
+
+# Extract version information
+PRODUCT_VERSION_MAJOR=$(grep -oP 'PRODUCT_VERSION_MAJOR = \K.*' "$CONFIG_FILE")
+PRODUCT_VERSION_MINOR=$(grep -oP 'PRODUCT_VERSION_MINOR = \K.*' "$CONFIG_FILE")
+LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
 
 # Check if avb.pem exists and set avb algorithm
 # Set VERITY_SWITCHES based on the presence of avb.pem or verity.x509.pem.
 AVB_ALGORITHM=SHA256_RSA4096
 if [ -f "$KEY_DIR"/avb.pem ]; then
     [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
-    VERITY_SWITCHES=( --avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM" )
+    VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM")
     if [[ "$build_id" != [st] ]]; then
-        VERITY_SWITCHES+=( --avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM" )
+        VERITY_SWITCHES+=(--avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM")
     fi
 # Check if verity.x509.pem exists and sign target files apks with verity
 elif [ -f "$KEY_DIR"/verity.x509.pem ]; then
-    VERITY_SWITCHES=( --replace_verity_public_key "$KEY_DIR/verity_key.pub"
+    VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub"
         --replace_verity_private_key "$KEY_DIR/verity"
-        --replace_verity_keyid "$KEY_DIR/verity.x509.pem" )
+        --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
 fi
 
-SIGN_TARGETS=( "${VERITY_SWITCHES[@]}" )
+SIGN_TARGETS=("${VERITY_SWITCHES[@]}")
 
 if [[ "$build_id" == [rst] ]]; then
     PACKAGE_LIST=(
@@ -175,14 +167,14 @@ if [[ "$build_id" == [rst] ]]; then
         if [ -f "$KEY_DIR/avb.pem" ]; then
             for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
                 if [ "$PACKAGE" == "com.android.btservices" ] && [ -f "$KEY_DIR/bluetooth.x509.pem" ]; then
-                    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/bluetooth"
-                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem" )
+                    SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/bluetooth"
+                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
                 elif [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
-                    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
-                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem" )
+                    SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
+                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
                 else
-                    SIGN_TARGETS+=( --extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
-                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem" )
+                    SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
                 fi
             done
         fi
@@ -190,9 +182,9 @@ if [[ "$build_id" == [rst] ]]; then
 
     for PACKAGE in "${PACKAGE_LIST[@]}"; do
         if [ "$PACKAGE" == "Bluetooth" ] && [ -f "$KEY_DIR/bluetooth.x509.pem" ]; then
-            SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/bluetooth" )
+            SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/bluetooth")
         else
-            SIGN_TARGETS+=( --extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey" )
+            SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey")
         fi
     done
 fi
