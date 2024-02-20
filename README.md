@@ -18,7 +18,12 @@
    lunch lineage_alioth-userdebug
    ```
 
-3. Generate keys (Skip this step if you have already generated keys. Make sure they are in the keys directory).
+3. Generate the target files package, otatools package using the following command:
+   ```
+   make target-files-package otatools generate_verity_key
+   ```
+
+4. Generate keys (Skip this step if you have already generated keys. Make sure they are in the keys directory).
 
    - Create a new folder for the keys:
 
@@ -57,17 +62,14 @@
 
    ```
    make generate_verity_key
-   $LOS_ROOT/out/host/linux-x86/bin/generate_verity_key -convert ~/.android-certs/marlin/verity.x509.pem ~/.android-certs/marlin/verity_key
+   generate_verity_key -convert ~/.android-certs/marlin/verity.x509.pem ~/.android-certs/marlin/verity_key
    openssl x509 -outform der -in ~/.android-certs/marlin/verity.x509.pem -out $LOS_ROOT/kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
    ```
-
-
-4. Generate the target files package, otatools package using the following command:
-   - Generate a signed build OTA and factory image using the following command:
+5. Generate a signed build OTA and factory image using the following command:
    ```
-   make target-files-package otatools
    $LOS_ROOT/script/release.sh alioth
    ```
+
 5. (Optional) Generate delta packages (Incremental updates) using the following command:
 
    ```
