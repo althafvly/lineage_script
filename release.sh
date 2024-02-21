@@ -115,7 +115,7 @@ if [[ "$build_id" == [rst] ]]; then
         fi
 
         if [ -f "$KEY_DIR/avb.pem" ]; then
-            for PACKAGE in "${APEX_PACKAGE_LIST[@]}"; do
+            for PACKAGE in $APEX_PACKAGE_LIST; do
                 if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
                     SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
                         --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")

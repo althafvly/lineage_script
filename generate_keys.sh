@@ -42,16 +42,7 @@ dir="$(dirname "$(realpath "$0")")"
 subject='/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=LineageOS/emailAddress=android@android.com'
 
 # Specify the certs to generate
-common=(
-    "releasekey"
-    "platform"
-    "shared"
-    "media"
-    "networkstack"
-    "verity"
-    "bluetooth"
-    "sdk_sandbox"
-)
+common=$(cat "$dir/common.list")
 
 # Optionally generate apex
 if [ "$apex" = true ]; then
@@ -68,7 +59,7 @@ if [ "$avb" = true ]; then
 else
     # Loop through the certificate names and generate keys using the make_key.sh script
     echo "Note: Use same password for all certificates you generate"
-    for cert in "${common[@]}"; do
+    for cert in $common; do
         no_password=$no_pass "$dir"/make_key.sh "$cert" "$subject"
         if [ "$apex" = true ]; then
             if [ "$no_pass" = true ]; then
