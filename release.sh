@@ -78,25 +78,7 @@ PRODUCT_VERSION_MAJOR=$(grep -oP 'PRODUCT_VERSION_MAJOR = \K.*' "$CONFIG_FILE")
 PRODUCT_VERSION_MINOR=$(grep -oP 'PRODUCT_VERSION_MINOR = \K.*' "$CONFIG_FILE")
 LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
 
-# Check if avb.pem exists and set avb algorithm
-# Set VERITY_SWITCHES based on the presence of avb.pem or verity.x509.pem.
-AVB_ALGORITHM=SHA256_RSA4096
-if [ -f "$KEY_DIR"/avb.pem ]; then
-    if [ -f "$KEY_DIR"/avb_pkmd.bin ]; then
-        [[ $(stat -c %s "$KEY_DIR/avb_pkmd.bin") -eq 520 ]] && AVB_ALGORITHM=SHA256_RSA2048
-    fi
-    VERITY_SWITCHES=(--avb_vbmeta_key "$KEY_DIR/avb.pem" --avb_vbmeta_algorithm "$AVB_ALGORITHM")
-    if [[ "$build_id" != [st] ]]; then
-        VERITY_SWITCHES+=(--avb_system_key "$KEY_DIR/avb.pem" --avb_system_algorithm "$AVB_ALGORITHM")
-    fi
-# Check if verity.x509.pem exists and sign target files apks with verity
-elif [ -f "$KEY_DIR"/verity.x509.pem ]; then
-    VERITY_SWITCHES=(--replace_verity_public_key "$KEY_DIR/verity_key.pub"
-        --replace_verity_private_key "$KEY_DIR/verity"
-        --replace_verity_keyid "$KEY_DIR/verity.x509.pem")
-fi
-
-SIGN_TARGETS=("${VERITY_SWITCHES[@]}")
+SIGN_TARGETS=("")
 
 if [[ "$build_id" == [rst] ]]; then
     PACKAGE_LIST=(
@@ -117,17 +99,19 @@ if [[ "$build_id" == [rst] ]]; then
             )
         fi
 
-        if [ -f "$KEY_DIR/avb.pem" ]; then
-            for PACKAGE in $APEX_PACKAGE_LIST; do
-                if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
-                    SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
-                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
-                else
-                    SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
-                        --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
-                fi
-            done
-        fi
+        for PACKAGE in $APEX_PACKAGE_LIST; do
+            if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
+                SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
+                    --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
+            elif [ -f "$KEY_DIR/avb.pem" ]; then
+                SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+                    --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
+            else
+                echo "APEX modules will signed using public payload key"
+                SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+                    --extra_apex_payload_key "$PACKAGE.apex=$ROM_ROOT/external/avb/test/data/testkey_rsa4096.pem")
+            fi
+        done
     fi
 
     for PACKAGE in "${PACKAGE_LIST[@]}"; do
