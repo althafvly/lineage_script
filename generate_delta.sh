@@ -50,34 +50,9 @@ KEY_DIR="$NEW_TARGET_DIR/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 "$dir"/crypt_keys.sh -d "$KEY_DIR"
 
-# Define a function to delete temp directories
-cleanup() {
-  echo "Cleaning up..."
-  rm -rf "$KEY_DIR" "$NEW_TARGET_DIR/otatools"
-  exit 1
-}
-
-# Unzip the OTA tools into the output directory and remove it when the script exits.
-if [ -f "$NEW_TARGET_DIR/otatools.zip" ]; then
-    unzip -o "$NEW_TARGET_DIR/otatools.zip" -d "$NEW_TARGET_DIR/otatools" || exit 1
-    cd "$NEW_TARGET_DIR/otatools"
-else
-    print_error "Can't find otatools.zip in $NEW_TARGET_DIR"
-fi
-
-# Registering the cleanup function for script failure and interruption
-trap cleanup ERR SIGINT SIGTERM
-
-# Set the path to the build tools and path tools directories
-export PATH="$ROM_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
-export PATH="$ROM_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
-export PATH="$NEW_TARGET_DIR/otatools/bin:$PATH"
-
 # Extract the build numbers from the old and new target zips
 BUILD_NUMBER=$(basename "${OLD_TARGET_ZIP%%.*}" | cut -d'-' -f3)-$(basename "${NEW_TARGET_ZIP%%.*}" | cut -d'-' -f3)
 
 # Create the incremental OTA package
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
     -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$NEW_TARGET_DIR/lineage_$DEVICE-incremental-$BUILD_NUMBER.zip"
-
-cleanup
