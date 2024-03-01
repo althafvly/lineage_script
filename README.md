@@ -20,7 +20,7 @@
 
 3. Generate the target files package, otatools package using the following command:
    ```
-   make target-files-package otatools generate_verity_key
+   make target-files-package otatools
    ```
 
 4. Generate keys (Skip this step if you have already generated keys. Make sure they are in the keys directory).
@@ -45,22 +45,6 @@
    ```
    bash script/generate_keys.sh
    ```
-
-   - For AVB-1.0+ (e.g. sargo- Pixel 3a, aliothin/alioth- Mi 11X/Poco F3), generate the keys using the following commands, Make sure that AVB is not disabled:
-
-   ```
-   bash script/generate_keys.sh -v
-   ```
-
-   - Navigate back to the build directory.
-
-   - For AVB-1.0 (e.g. marlin- Pixel XL), generate the keys using the following commands, location in kernel is might differ for devices:
-
-   ```
-   make generate_verity_key
-   generate_verity_key -convert ~/.android-certs/marlin/verity.x509.pem ~/.android-certs/marlin/verity_key
-   openssl x509 -outform der -in ~/.android-certs/marlin/verity.x509.pem -out kernel/google/marlin/verifiedboot_marlin_relkeys.der.x509
-   ```
 5. Generate a signed build OTA and factory image using the following command:
    ```
    script/release.sh alioth
@@ -80,16 +64,3 @@ Note:
   - out/target/product/alioth
 - Target file should be in this location after build.
   - out/target/product/alioth/lineage_alioth-target_files-$BUILD_NUMBER.zip
-- Flashing avb_custom_key for AVB-1.0+ (Flash OTA or factory image afterwards, only if device supports)
-  ```
-  fastboot erase avb_custom_key
-  fastboot flash avb_custom_key ~/.android-certs/alioth/avb_pkmd.bin
-  ```
-- To lock bootloader AVB-1.0+
-  ```
-  fastboot flashing lock
-  ```
-  To lock bootloader AVB-1.0
-  ```
-  fastboot oem lock
-  ```
