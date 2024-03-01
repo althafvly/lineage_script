@@ -78,18 +78,18 @@ PRODUCT_VERSION_MAJOR=$(grep -oP 'PRODUCT_VERSION_MAJOR = \K.*' "$CONFIG_FILE")
 PRODUCT_VERSION_MINOR=$(grep -oP 'PRODUCT_VERSION_MINOR = \K.*' "$CONFIG_FILE")
 LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
 
-SIGN_TARGETS=("")
+SIGN_TARGETS=()
 
-if [[ "$build_id" == [rst] ]]; then
+if [[ "$build_id" == [rstu] ]]; then
     PACKAGE_LIST=(
         "OsuLogin"
         "ServiceWifiResources"
     )
-    if [[ "$build_id" == [st] ]]; then
+    if [[ "$build_id" == [stu] ]]; then
         PACKAGE_LIST+=(
             "ServiceConnectivityResources"
         )
-        if [[ "$build_id" == [t] ]]; then
+        if [[ "$build_id" == [tu] ]]; then
             PACKAGE_LIST+=(
                 "AdServicesApk"
                 "HalfSheetUX"
