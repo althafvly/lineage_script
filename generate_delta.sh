@@ -18,9 +18,12 @@ dir="$(dirname "$(realpath "$0")")"
 # Set the scheduling policy for the current process to 'batch'
 chrt -b -p 0 $$
 
+# Get ROM root directory from OUT
+ROM_ROOT="${OUT%\/out/*}"
+
 # Set the paths to the directories containing the keys
-OLD_COMMON_KEY_DIR=$LOS_ROOT/keys/common
-OLD_PERSISTENT_KEY_DIR=$LOS_ROOT/keys/$1
+OLD_COMMON_KEY_DIR=$ROM_ROOT/keys/common
+OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$1
 # Use common/device keys dir if it exists
 if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
@@ -66,8 +69,8 @@ fi
 trap cleanup ERR SIGINT SIGTERM
 
 # Set the path to the build tools and path tools directories
-export PATH="$LOS_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
-export PATH="$LOS_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
+export PATH="$ROM_ROOT/prebuilts/build-tools/linux-x86/bin:$PATH"
+export PATH="$ROM_ROOT/prebuilts/build-tools/path/linux-x86:$PATH"
 export PATH="$NEW_TARGET_DIR/otatools/bin:$PATH"
 
 # Extract the build numbers from the old and new target zips
