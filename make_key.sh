@@ -19,20 +19,20 @@
 
 # Check for correct number of arguments
 if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
-    cat <<EOF
+  cat <<EOF
 Usage: $0 <name> <subject> [<keytype>]
 
 Creates <name>.pk8 key and <name>.x509.pem cert.  Cert contains the
 given <subject>. A keytype of "rsa" or "ec" is accepted.
 EOF
-    exit 2
+  exit 2
 fi
 
 # Check if files already exist with the same name
 if [[ -e $1.pk8 || -e $1.x509.pem ]]; then
-    echo "$1.pk8 and/or $1.x509.pem already exist; please delete them first"
-    echo "if you want to replace them."
-    exit 1
+  echo "$1.pk8 and/or $1.x509.pem already exist; please delete them first"
+  echo "if you want to replace them."
+  exit 1
 fi
 
 # Use named pipes to connect get the raw RSA private key to the cert-
@@ -48,42 +48,42 @@ chmod 0600 "${one}" "${two}"
 
 # Prompt user for password
 if [ ! "$no_password" = true ]; then
-    read -r -p "Enter password for '$1' (blank for none; password will be visible): " password
+  read -r -p "Enter password for '$1' (blank for none; password will be visible): " password
 else
-    password=""
+  password=""
 fi
 
 if [ "${3}" = "rsa" ] || [ "$#" -eq 2 ]; then
-    # Generate an RSA private key
-    if [[ $1 == "verity" ]]; then
-        (openssl genrsa -f4 2048 | tee "${one}" >"${two}") &
-    else
-        (openssl genrsa -f4 4096 | tee "${one}" >"${two}") &
-    fi
-    hash="-sha256"
+  # Generate an RSA private key
+  if [[ $1 == "verity" ]]; then
+    (openssl genrsa -f4 2048 | tee "${one}" >"${two}") &
+  else
+    (openssl genrsa -f4 4096 | tee "${one}" >"${two}") &
+  fi
+  hash="-sha256"
 elif [ "${3}" = "ec" ]; then
-    # Generate an EC private key
-    (openssl ecparam -name prime256v1 -genkey -noout | tee "${one}" >"${two}") &
-    hash="-sha256"
+  # Generate an EC private key
+  (openssl ecparam -name prime256v1 -genkey -noout | tee "${one}" >"${two}") &
+  hash="-sha256"
 else
-    echo "Only accepts RSA or EC keytypes."
-    exit 1
+  echo "Only accepts RSA or EC keytypes."
+  exit 1
 fi
 
 # Generate the certificate
 openssl req -new -x509 ${hash} -key "${two}" -out "$1.x509.pem" \
-    -days 10000 -subj "$2" &
+  -days 10000 -subj "$2" &
 
 # Generate the PKCS#8 formatted private key
 if [ "${password}" == "" ]; then
-    echo "creating ${1}.pk8 with no password"
-    openssl pkcs8 -in "${one}" -topk8 -outform DER -out "$1.pk8" -nocrypt
+  echo "creating ${1}.pk8 with no password"
+  openssl pkcs8 -in "${one}" -topk8 -outform DER -out "$1.pk8" -nocrypt
 else
-    echo "creating ${1}.pk8 with password [${password}]"
-    export password
-    openssl pkcs8 -in "${one}" -topk8 -v1 PBE-SHA1-3DES -outform DER -out "$1.pk8" \
-        -passout env:password
-    unset password
+  echo "creating ${1}.pk8 with password [${password}]"
+  export password
+  openssl pkcs8 -in "${one}" -topk8 -v1 PBE-SHA1-3DES -outform DER -out "$1.pk8" \
+    -passout env:password
+  unset password
 fi
 
 wait

@@ -13,14 +13,14 @@ export LANG=en_US.UTF-8
 export _JAVA_OPTIONS=-XX:-UsePerfData
 # set the build date and time to the contents of the "out/build_date.txt" file or the current Unix timestamp in UTC format
 if [ -f out/build_date.txt ]; then
-    rm out/build_date.txt
+  rm out/build_date.txt
 fi
 export BUILD_DATETIME=$(cat out/build_date.txt 2>/dev/null || date -u +%s)
 # print the build date and time to the console
 echo "BUILD_DATETIME=$BUILD_DATETIME"
 # set the build number to the contents of the "out/soong/build_number.txt" file or the date and time corresponding to the Unix timestamp in the specified format
 if [ -f out/soong/build_number.txt ]; then
-    rm out/soong/build_number.txt
+  rm out/soong/build_number.txt
 fi
 export BUILD_NUMBER=$(cat out/soong/build_number.txt 2>/dev/null || date -u -d @$BUILD_DATETIME +%Y%m%d00)
 # print the build number to the console

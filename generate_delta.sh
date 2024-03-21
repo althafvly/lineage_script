@@ -5,8 +5,8 @@ set -o errexit -o pipefail
 
 # Function to print an error message and exit the script with an error code
 print_error() {
-    echo "$1" >&2
-    exit 1
+  echo "$1" >&2
+  exit 1
 }
 
 # Get the directory containing this script
@@ -26,16 +26,16 @@ OLD_COMMON_KEY_DIR=$ROM_ROOT/keys/common
 OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$1
 # Use common/device keys dir if it exists
 if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
-    PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
+  PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
 elif [ -d "$OLD_COMMON_KEY_DIR" ]; then
-    PERSISTENT_KEY_DIR=$OLD_COMMON_KEY_DIR
+  PERSISTENT_KEY_DIR=$OLD_COMMON_KEY_DIR
 else
-    COMMON_KEY_DIR=~/.android-certs
-    PERSISTENT_KEY_DIR=~/.android-certs/$DEVICE
-    # Use common keys if device dir doesnt exists
-    if [ ! -d "$PERSISTENT_KEY_DIR" ]; then
-        PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
-    fi
+  COMMON_KEY_DIR=~/.android-certs
+  PERSISTENT_KEY_DIR=~/.android-certs/$DEVICE
+  # Use common keys if device dir doesnt exists
+  if [ ! -d "$PERSISTENT_KEY_DIR" ]; then
+    PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
+  fi
 fi
 
 # Save the device name, old target zip, and new target zip arguments in variables
@@ -55,4 +55,4 @@ BUILD_NUMBER=$(basename "${OLD_TARGET_ZIP%%.*}" | cut -d'-' -f3)-$(basename "${N
 
 # Create the incremental OTA package
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
-    -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$NEW_TARGET_DIR/lineage_$DEVICE-incremental-$BUILD_NUMBER.zip"
+  -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$NEW_TARGET_DIR/lineage_$DEVICE-incremental-$BUILD_NUMBER.zip"
