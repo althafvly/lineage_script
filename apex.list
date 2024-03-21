@@ -12,6 +12,8 @@ com.android.connectivity.resources
 com.android.conscrypt
 com.android.devicelock
 com.android.extservices
+com.android.hardware.biometrics.fingerprint.virtual
+com.android.hardware.cas
 com.android.hardware.wifi
 com.android.healthfitness
 com.android.hotspot2.osulogin

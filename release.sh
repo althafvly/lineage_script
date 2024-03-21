@@ -27,12 +27,8 @@ fi
 # Get ROM root directory from OUT
 ROM_ROOT="${OUT%\/out/*}"
 
-# Extract the build ID from the build/make/core/build_id.mk file
-build_id=$(grep -o 'BUILD_ID=.*' "$ROM_ROOT/build/make/core/build_id.mk" | cut -d "=" -f 2 | cut -c 1 | tr '[:upper:]' '[:lower:]')
-
 # Make sure the BUILD_NUMBER environment variable set. Also build_id is not empty
 [[ -n $BUILD_NUMBER ]] || print_error "Expected BUILD_NUMBER in the environment"
-[[ -n $build_id ]] || print_error "Run this script in root dir also make sure cloned in [LINEAGEOS_ROOT]/script"
 
 # Set the scheduling policy of this script to "batch" for better performance
 chrt -b -p 0 $$
@@ -62,9 +58,6 @@ if [ ! -d "$KEY_DIR" ]; then
   "$dir"/crypt_keys.sh -d "$KEY_DIR"
 fi
 
-# Set the target files name
-TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
-
 APEX_PACKAGE_LIST=$(cat "$dir/apex.list")
 
 CONFIG_FILE="vendor/lineage/config/version.mk"
@@ -80,16 +73,16 @@ LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
 
 SIGN_TARGETS=()
 
-if [[ "$build_id" == [rstu] ]]; then
+if [ "$PRODUCT_VERSION_MAJOR" -ge 18 ]; then
   PACKAGE_LIST=(
     "OsuLogin"
     "ServiceWifiResources"
   )
-  if [[ "$build_id" == [stu] ]]; then
+  if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
     PACKAGE_LIST+=(
       "ServiceConnectivityResources"
     )
-    if [[ "$build_id" == [tu] ]]; then
+    if [ "$PRODUCT_VERSION_MAJOR" -ge 20 ]; then
       PACKAGE_LIST+=(
         "AdServicesApk"
         "HalfSheetUX"
@@ -119,8 +112,17 @@ if [[ "$build_id" == [rstu] ]]; then
   done
 fi
 
+# Set the target files name
+TARGET_DIR=$OUT/obj/PACKAGING/target_files_intermediates
+TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
+
+UNSIGNED_TARGET_FILES=$TARGET_FILES
+if [ ! -f "$TARGET_DIR/$TARGET_FILES" ]; then
+  UNSIGNED_TARGET_FILES=lineage_$DEVICE-target_files.zip
+fi
+
 sign_target_files_apks -o -d "$KEY_DIR" "${SIGN_TARGETS[@]}" \
-  "$OUT/obj/PACKAGING/target_files_intermediates/$TARGET_FILES" "$OUT/$TARGET_FILES"
+  "$TARGET_DIR/$UNSIGNED_TARGET_FILES" "$OUT/$TARGET_FILES"
 
 ota_from_target_files -k "$KEY_DIR/releasekey" "$OUT/$TARGET_FILES" \
   "$OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-ota_package-$DEVICE-signed.zip" || exit 1
