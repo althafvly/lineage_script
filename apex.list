@@ -12,6 +12,8 @@ com.android.connectivity.resources
 com.android.conscrypt
 com.android.devicelock
 com.android.extservices
+com.android.graphics.pdf
+com.android.hardware.biometrics.face.virtual
 com.android.hardware.biometrics.fingerprint.virtual
 com.android.hardware.cas
 com.android.hardware.wifi
