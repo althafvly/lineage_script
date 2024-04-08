@@ -12,8 +12,8 @@ print_error() {
 # Get the directory containing this script
 dir="$(dirname "$(realpath "$0")")"
 
-# Check if the script was called with three arguments (device name, old target zip, and new target zip)
-[[ $# -eq 3 ]] || print_error "expected 3 arguments (device, old_target.zip, new_target.zip)"
+# Check if the script was called with three arguments (device name, old target zip, new target zip and output zip)
+[[ $# -eq 4 ]] || print_error "expected 4 arguments (device, old_target.zip, new_target.zip, output-incremental.zip)"
 
 # Set the scheduling policy for the current process to 'batch'
 chrt -b -p 0 $$
@@ -42,7 +42,7 @@ fi
 DEVICE=$1
 OLD_TARGET_ZIP=$(realpath "$2")
 NEW_TARGET_ZIP=$(realpath "$3")
-NEW_TARGET_DIR=${NEW_TARGET_ZIP%/*}
+OUTPUT_ZIP=$(realpath "$4")
 
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
@@ -50,9 +50,6 @@ KEY_DIR="$NEW_TARGET_DIR/keys"
 cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 "$dir"/crypt_keys.sh -d "$KEY_DIR"
 
-# Extract the build numbers from the old and new target zips
-BUILD_NUMBER=$(basename "${OLD_TARGET_ZIP%%.*}" | cut -d'-' -f3)-$(basename "${NEW_TARGET_ZIP%%.*}" | cut -d'-' -f3)
-
 # Create the incremental OTA package
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
-  -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$NEW_TARGET_DIR/lineage_$DEVICE-incremental-$BUILD_NUMBER.zip"
+  -i "$OLD_TARGET_ZIP" "$NEW_TARGET_ZIP" "$OUTPUT_ZIP"

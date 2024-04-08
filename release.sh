@@ -27,9 +27,6 @@ fi
 # Get ROM root directory from OUT
 ROM_ROOT="${OUT%\/out/*}"
 
-# Make sure the BUILD_NUMBER environment variable set. Also build_id is not empty
-[[ -n $BUILD_NUMBER ]] || print_error "Expected BUILD_NUMBER in the environment"
-
 # Set the scheduling policy of this script to "batch" for better performance
 chrt -b -p 0 $$
 
@@ -112,29 +109,29 @@ if [ "$PRODUCT_VERSION_MAJOR" -ge 18 ]; then
   done
 fi
 
-# Set the target files name
 TARGET_DIR=$OUT/obj/PACKAGING/target_files_intermediates
-TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_NUMBER.zip
 
-UNSIGNED_TARGET_FILES=$TARGET_FILES
-if [ ! -f "$TARGET_DIR/$TARGET_FILES" ]; then
-  UNSIGNED_TARGET_FILES=lineage_$DEVICE-target_files.zip
+if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
+  # Set the target files name
+  BUILD_DATE=$(date -u +%Y%m%d)
+  TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_DATE.zip
+  sign_target_files_apks -o -d "$KEY_DIR" "${SIGN_TARGETS[@]}" \
+    $TARGET_DIR/*-target_files*.zip "$OUT/$TARGET_FILES"
+
+  ota_from_target_files -k "$KEY_DIR/releasekey" "$OUT/$TARGET_FILES" \
+    "$OUT/lineage-$LINEAGE_VER-$BUILD_DATE-ota_package-$DEVICE-signed.zip" || exit 1
+
+  FASTBOOT_PACKAGE="lineage-$LINEAGE_VER-$BUILD_DATE-fastboot_package-$DEVICE.zip"
+  IMAGES=("recovery" "boot" "vendor_boot" "dtbo")
+
+  img_from_target_files "$OUT/$TARGET_FILES" "$OUT/$FASTBOOT_PACKAGE"
+
+  for i in "${!IMAGES[@]}"; do
+    if unzip -l "$OUT/$FASTBOOT_PACKAGE" | grep -q "${IMAGES[i]}.img"; then
+      unzip -o -j -q "$OUT/$FASTBOOT_PACKAGE" "${IMAGES[i]}.img" -d "$OUT"
+      mv "$OUT/${IMAGES[i]}.img" "$OUT/lineage-$LINEAGE_VER-$BUILD_DATE-${IMAGES[i]}-$DEVICE.img"
+    fi
+  done
+else
+  print_error "Unable to find target_files"
 fi
-
-sign_target_files_apks -o -d "$KEY_DIR" "${SIGN_TARGETS[@]}" \
-  "$TARGET_DIR/$UNSIGNED_TARGET_FILES" "$OUT/$TARGET_FILES"
-
-ota_from_target_files -k "$KEY_DIR/releasekey" "$OUT/$TARGET_FILES" \
-  "$OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-ota_package-$DEVICE-signed.zip" || exit 1
-
-FASTBOOT_PACKAGE="lineage-$LINEAGE_VER-$BUILD_NUMBER-fastboot_package-$DEVICE.zip"
-IMAGES=("recovery" "boot" "vendor_boot" "dtbo")
-
-img_from_target_files "$OUT/$TARGET_FILES" "$OUT/$FASTBOOT_PACKAGE"
-
-for i in "${!IMAGES[@]}"; do
-  if unzip -l "$OUT/$FASTBOOT_PACKAGE" | grep -q "${IMAGES[i]}.img"; then
-    unzip -o -j -q "$OUT/$FASTBOOT_PACKAGE" "${IMAGES[i]}.img" -d "$OUT"
-    mv "$OUT/${IMAGES[i]}.img" "$OUT/lineage-$LINEAGE_VER-$BUILD_NUMBER-${IMAGES[i]}-$DEVICE.img"
-  fi
-done

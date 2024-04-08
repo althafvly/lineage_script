@@ -9,7 +9,7 @@
    - Set up the environment by running the following command:
 
    ```
-   source script/envsetup.sh
+   . build/envsetup.sh
    ```
 
    - Choose the target device using the following command and selecting the appropriate option:
@@ -54,8 +54,9 @@
 
    ```
    script/generate_delta.sh alioth \
-   out/target/product/alioth/lineage_alioth-target_files-$OLD_BUILD_NUMBER.zip \
-   out/target/product/alioth/lineage_alioth-target_files-$NEW_BUILD_NUMBER.zip
+   out/target/product/alioth/lineage_alioth-target_files-$OLD_BUILD_DATE.zip \
+   out/target/product/alioth/lineage_alioth-target_files-$NEW_BUILD_DATE.zip \
+   generated_output.zip
    ```
 
 Note:
@@ -63,4 +64,4 @@ Note:
 - The build should be in this location.
   - out/target/product/alioth
 - Target file should be in this location after build.
-  - out/target/product/alioth/lineage_alioth-target_files-$BUILD_NUMBER.zip
+  - out/target/product/alioth/lineage_alioth-target_files-$BUILD_DATE.zip
