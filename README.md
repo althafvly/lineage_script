@@ -53,7 +53,7 @@
 5. (Optional) Generate delta packages (Incremental updates) using the following command:
 
    ```
-   script/generate_delta.sh alioth \
+   script/release_incremental.sh alioth \
    out/target/product/alioth/lineage_alioth-target_files-$OLD_BUILD_DATE.zip \
    out/target/product/alioth/lineage_alioth-target_files-$NEW_BUILD_DATE.zip \
    generated_output.zip

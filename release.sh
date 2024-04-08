@@ -55,63 +55,62 @@ if [ ! -d "$KEY_DIR" ]; then
   "$dir"/crypt_keys.sh -d "$KEY_DIR"
 fi
 
-APEX_PACKAGE_LIST=$(cat "$dir/apex.list")
-
-CONFIG_FILE="vendor/lineage/config/version.mk"
-if [ ! -f "$CONFIG_FILE" ]; then
-  # If version.mk doesn't exist, use common.mk
-  CONFIG_FILE="vendor/lineage/config/common.mk"
-fi
-
-# Extract version information
-PRODUCT_VERSION_MAJOR=$(grep -oP 'PRODUCT_VERSION_MAJOR = \K.*' "$CONFIG_FILE")
-PRODUCT_VERSION_MINOR=$(grep -oP 'PRODUCT_VERSION_MINOR = \K.*' "$CONFIG_FILE")
-LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
-
-SIGN_TARGETS=()
-
-if [ "$PRODUCT_VERSION_MAJOR" -ge 18 ]; then
-  PACKAGE_LIST=(
-    "OsuLogin"
-    "ServiceWifiResources"
-  )
-  if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
-    PACKAGE_LIST+=(
-      "ServiceConnectivityResources"
-    )
-    if [ "$PRODUCT_VERSION_MAJOR" -ge 20 ]; then
-      PACKAGE_LIST+=(
-        "AdServicesApk"
-        "HalfSheetUX"
-        "SafetyCenterResources"
-        "ServiceUwbResources"
-        "WifiDialog"
-      )
-    fi
-
-    for PACKAGE in $APEX_PACKAGE_LIST; do
-      if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
-        SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
-          --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
-      elif [ -f "$KEY_DIR/avb.pem" ]; then
-        SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
-          --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
-      else
-        echo "APEX modules will signed using public payload key"
-        SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
-          --extra_apex_payload_key "$PACKAGE.apex=$ROM_ROOT/external/avb/test/data/testkey_rsa4096.pem")
-      fi
-    done
-  fi
-
-  for PACKAGE in "${PACKAGE_LIST[@]}"; do
-    SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey")
-  done
-fi
-
 TARGET_DIR=$OUT/obj/PACKAGING/target_files_intermediates
 
 if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
+  CONFIG_FILE="vendor/lineage/config/version.mk"
+  if [ ! -f "$CONFIG_FILE" ]; then
+    # If version.mk doesn't exist, use common.mk
+    CONFIG_FILE="vendor/lineage/config/common.mk"
+  fi
+
+  # Extract version information
+  PRODUCT_VERSION_MAJOR=$(grep -oP 'PRODUCT_VERSION_MAJOR = \K.*' "$CONFIG_FILE")
+  PRODUCT_VERSION_MINOR=$(grep -oP 'PRODUCT_VERSION_MINOR = \K.*' "$CONFIG_FILE")
+  LINEAGE_VER=$PRODUCT_VERSION_MAJOR.$PRODUCT_VERSION_MINOR
+
+  SIGN_TARGETS=()
+
+  if [ "$PRODUCT_VERSION_MAJOR" -ge 18 ]; then
+    PACKAGE_LIST=(
+      "OsuLogin"
+      "ServiceWifiResources"
+    )
+    if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
+      PACKAGE_LIST+=(
+        "ServiceConnectivityResources"
+      )
+      if [ "$PRODUCT_VERSION_MAJOR" -ge 20 ]; then
+        PACKAGE_LIST+=(
+          "AdServicesApk"
+          "HalfSheetUX"
+          "SafetyCenterResources"
+          "ServiceUwbResources"
+          "WifiDialog"
+        )
+      fi
+
+      APEX_PACKAGE_LIST=$(cat "$dir/apex.list")
+      for PACKAGE in $APEX_PACKAGE_LIST; do
+        if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
+          SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
+            --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
+        elif [ -f "$KEY_DIR/avb.pem" ]; then
+          SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+            --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
+        else
+          echo "APEX modules will signed using public payload key"
+          SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+            --extra_apex_payload_key "$PACKAGE.apex=$ROM_ROOT/external/avb/test/data/testkey_rsa4096.pem")
+        fi
+      done
+    fi
+
+    for PACKAGE in "${PACKAGE_LIST[@]}"; do
+      SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey")
+    done
+  fi
+
   # Set the target files name
   BUILD_DATE=$(date -u +%Y%m%d)
   TARGET_FILES=lineage_$DEVICE-target_files-$BUILD_DATE.zip
