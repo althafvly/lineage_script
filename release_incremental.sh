@@ -15,6 +15,8 @@ dir="$(dirname "$(realpath "$0")")"
 # Check if the script was called with three arguments (device name, old target zip, new target zip and output zip)
 [[ $# -eq 4 ]] || print_error "expected 4 arguments (device, old_target.zip, new_target.zip, output-incremental.zip)"
 
+DEVICE=$1
+
 # Set the scheduling policy for the current process to 'batch'
 chrt -b -p 0 $$
 
@@ -23,7 +25,7 @@ ROM_ROOT="${OUT%\/out/*}"
 
 # Set the paths to the directories containing the keys
 OLD_COMMON_KEY_DIR=$ROM_ROOT/keys/common
-OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$1
+OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$DEVICE
 # Use common/device keys dir if it exists
 if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
   PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
@@ -39,7 +41,6 @@ else
 fi
 
 # Save the device name, old target zip, and new target zip arguments in variables
-DEVICE=$1
 OLD_TARGET_ZIP=$(realpath "$2")
 NEW_TARGET_ZIP=$(realpath "$3")
 OUTPUT_ZIP=$(realpath "$4")

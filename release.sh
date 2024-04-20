@@ -32,7 +32,7 @@ chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
 OLD_COMMON_KEY_DIR=$ROM_ROOT/keys/common
-OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$1
+OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$DEVICE
 # Use common/device keys dir if it exists
 if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
   PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
