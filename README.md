@@ -15,7 +15,7 @@
    - Choose the target device using the following command and selecting the appropriate option:
 
    ```
-   lunch lineage_alioth-userdebug
+   breakfast alioth
    ```
 
 3. Generate the target files package, otatools package using the following command:
