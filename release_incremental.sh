@@ -44,6 +44,7 @@ fi
 OLD_TARGET_ZIP=$(realpath "$2")
 NEW_TARGET_ZIP=$(realpath "$3")
 OUTPUT_ZIP=$(realpath "$4")
+NEW_TARGET_DIR=${NEW_TARGET_ZIP%/*}
 
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
