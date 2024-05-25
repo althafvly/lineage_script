@@ -71,40 +71,31 @@ if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
 
   SIGN_TARGETS=()
 
-  if [ "$PRODUCT_VERSION_MAJOR" -ge 18 ]; then
-    PACKAGE_LIST=(
+  if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
+    PACKAGE_LIST+=(
+      "AdServicesApk"
+      "HalfSheetUX"
       "OsuLogin"
+      "SafetyCenterResources"
+      "ServiceConnectivityResources"
+      "ServiceUwbResources"
       "ServiceWifiResources"
+      "WifiDialog"
     )
-    if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
-      PACKAGE_LIST+=(
-        "ServiceConnectivityResources"
-      )
-      if [ "$PRODUCT_VERSION_MAJOR" -ge 20 ]; then
-        PACKAGE_LIST+=(
-          "AdServicesApk"
-          "HalfSheetUX"
-          "SafetyCenterResources"
-          "ServiceUwbResources"
-          "WifiDialog"
-        )
-      fi
 
-      APEX_PACKAGE_LIST=$(cat "$dir/apex.list")
-      for PACKAGE in $APEX_PACKAGE_LIST; do
-        if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
-          SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
-            --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
-        elif [ -f "$KEY_DIR/avb.pem" ]; then
-          SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
-            --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
-        else
-          echo "APEX modules will signed using public payload key"
-          SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
-            --extra_apex_payload_key "$PACKAGE.apex=$ROM_ROOT/external/avb/test/data/testkey_rsa4096.pem")
-        fi
-      done
-    fi
+    for PACKAGE in $(cat "$dir/apex.list"); do
+      if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
+        SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
+          --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
+      elif [ -f "$KEY_DIR/avb.pem" ]; then
+        SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+          --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/avb.pem")
+      else
+        echo "APEX modules will signed using public payload key"
+        SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/releasekey"
+          --extra_apex_payload_key "$PACKAGE.apex=$ROM_ROOT/external/avb/test/data/testkey_rsa4096.pem")
+      fi
+    done
 
     for PACKAGE in "${PACKAGE_LIST[@]}"; do
       SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey")
