@@ -3,6 +3,7 @@ platform
 shared
 media
 networkstack
+nfc
 verity
 bluetooth
 sdk_sandbox
