@@ -72,17 +72,6 @@ if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
   SIGN_TARGETS=()
 
   if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
-    PACKAGE_LIST+=(
-      "AdServicesApk"
-      "HalfSheetUX"
-      "OsuLogin"
-      "SafetyCenterResources"
-      "ServiceConnectivityResources"
-      "ServiceUwbResources"
-      "ServiceWifiResources"
-      "WifiDialog"
-    )
-
     for PACKAGE in $(cat "$dir/apex.list"); do
       if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
         SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
@@ -97,7 +86,7 @@ if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
       fi
     done
 
-    for PACKAGE in "${PACKAGE_LIST[@]}"; do
+    for PACKAGE in $(cat "$dir/apexapk.list"); do
       SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey")
     done
   fi
