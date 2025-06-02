@@ -55,7 +55,7 @@ if [ "$avb" = true ]; then
   else
     openssl genrsa 4096 | openssl pkcs8 -topk8 -scrypt -out avb.pem
   fi
-  ../../external/avb/avbtool extract_public_key --key avb.pem --output avb_pkmd.bin
+  python3 avbtool.py extract_public_key --key avb.pem --output avb_pkmd.bin
 else
   # Loop through the certificate names and generate keys using the make_key.sh script
   echo "Note: Use same password for all certificates you generate"
