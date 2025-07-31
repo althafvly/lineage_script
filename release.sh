@@ -101,7 +101,7 @@ if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
     "$OUT/lineage-$LINEAGE_VER-$BUILD_DATE-ota_package-$DEVICE-signed.zip" || exit 1
 
   FASTBOOT_PACKAGE="lineage-$LINEAGE_VER-$BUILD_DATE-fastboot_package-$DEVICE.zip"
-  IMAGES=("recovery" "boot" "vendor_boot" "dtbo")
+  IMAGES=("boot" "dtbo" "init_boot" "recovery" "super_empty" "vbmeta" "vendor_boot" "vendor_kernel_boot")
 
   img_from_target_files "$OUT/$TARGET_FILES" "$OUT/$FASTBOOT_PACKAGE"
 
