@@ -20,7 +20,7 @@
 
 3. Generate the target files package, otatools package using the following command:
    ```
-   make target-files-package otatools
+   mka target-files-package otatools
    ```
 
 4. Generate keys (Skip this step if you have already generated keys. Make sure they are in the keys directory).
@@ -36,14 +36,14 @@
 
    ```
    Usage: generate_keys.sh [-a] [-n] [-v] [-h]
-     -a   Generate apex certs
+     -a   Generate APEX certs
      -n   Do not prompt for password
      -v   Generate AVB certificate
-     -h   Display this help message
+     -h   Show this help message
    ```
 
    ```
-   bash script/generate_keys.sh
+   bash script/generate_keys.sh -a
    ```
 5. Generate a signed build OTA and factory image using the following command:
    ```
