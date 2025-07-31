@@ -5,8 +5,10 @@ com.android.appsearch
 com.android.appsearch.apk
 com.android.art
 com.android.bluetooth
+com.android.bt
 com.android.btservices
 com.android.cellbroadcast
+com.android.crashrecovery
 com.android.compos
 com.android.configinfrastructure
 com.android.connectivity.resources
@@ -48,6 +50,7 @@ com.android.telephony
 com.android.telephonymodules
 com.android.tethering
 com.android.tzdata
+com.android.uprobestats
 com.android.uwb
 com.android.uwb.resources
 com.android.virt
