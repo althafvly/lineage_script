@@ -11,8 +11,9 @@ print_error() {
 
 encrypt=false
 decrypt=false
+check=false
 
-while getopts "ed" opt; do
+while getopts "edc" opt; do
   case $opt in
   e)
     # Encoding option selected
@@ -22,6 +23,10 @@ while getopts "ed" opt; do
     # Decoding option selected
     decrypt=true
     ;;
+  c)
+    # Check option selected
+    check=true
+    ;;
   \?)
     # Invalid option selected
     echo "Invalid option: -$OPTARG" >&2
@@ -30,10 +35,13 @@ while getopts "ed" opt; do
   esac
 done
 
-if ! $encrypt && ! $decrypt; then
-  echo "Usage: $(basename "$0") [-e | -d] key_directory"
+dir="$(dirname "$(realpath "$0")")"
+
+if ! $encrypt && ! $decrypt && ! $check; then
+  echo "Usage: $(basename "$0") [-e | -d| -c] key_directory"
   echo "  -e: Encrypt the keys"
   echo "  -d: Decrypt the keys"
+  echo "  -c: Check decrypted keys"
   exit 1
 fi
 
@@ -46,15 +54,17 @@ shift $((OPTIND - 1))
 # Move to the key directory
 cd "$1"
 
-# Create a temporary directory for the decrypted/encrypted keys
-tmp="$(mktemp -d /dev/shm/crypt_keys.XXXXXXXXXX)"
+if ( $encrypt || $decrypt ); then
+  # Create a temporary directory for the decrypted/encrypted keys
+  tmp="$(mktemp -d /dev/shm/crypt_keys.XXXXXXXXXX)"
 
-# Prompt for key password if not defined
-[[ "${password+defined}" = defined ]] || read -r -p "Enter key passphrase (empty if none): " -s password
-echo
+  # Prompt for key password if not defined
+  [[ "${password+defined}" = defined ]] || read -r -p "Enter key passphrase (empty if none): " -s password
+  echo
 
-# Export password for openssl to use
-export password
+  # Export password for openssl to use
+  export password
+fi
 
 if $encrypt; then
   # Prompt user for old and new key passphrases
@@ -113,13 +123,27 @@ elif $decrypt; then
       openssl pkcs8 -topk8 -in avb.pem -out "$tmp/avb.pem" -nocrypt
     fi
   fi
+elif $check; then
+  echo "Checking keys in: $1"
+  cert_list=$(<"$dir/apex.list")
+  cert_list+=$(<"$dir/common.list")
+  for key in $cert_list; do
+      [[ -f "$key.pk8" ]] || continue
+
+      openssl pkcs8 -inform DER -nocrypt -in "$key.pk8" -out /dev/null 2>/dev/null
+
+      if [[ $? -ne 0 ]]; then
+          echo "$key failed"
+      fi
+  done
+  echo "Done"
 fi
 
 # Unset the password environment variable
 unset password
 
 # Move the decrypted keys to the original directory
-if [[ -d $tmp ]]; then
+if ( $encrypt || $decrypt ) && [[ -d $tmp ]]; then
   mv "$tmp"/* .
   rm -rf "$tmp"
 fi
