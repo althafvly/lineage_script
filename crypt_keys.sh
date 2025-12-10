@@ -82,7 +82,7 @@ if $encrypt; then
   export new_password
 
   # Loop through keys and encrypt with new passphrase
-  for key in releasekey platform shared media networkstack bluetooth sdk_sandbox verity; do
+  for key in $(<"$dir/common.list"); do
     if [[ -f $key.pk8 ]]; then
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -passout env:new_password -scrypt
@@ -105,7 +105,7 @@ if $encrypt; then
   unset new_password
 elif $decrypt; then
   # Decrypt each key in the directory
-  for key in releasekey platform shared media networkstack bluetooth sdk_sandbox verity; do
+  for key in $(<"$dir/common.list"); do
     if [[ -f $key.pk8 ]]; then
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -nocrypt
