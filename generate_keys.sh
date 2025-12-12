@@ -3,21 +3,24 @@
 apex=false
 no_pass=false
 avb=false
+force=false
 
 # Parse CLI options
-while getopts ":hanv" opt; do
+while getopts ":hanvf" opt; do
   case ${opt} in
     h)
-      echo "Usage: $0 [-a] [-n] [-v] [-h]"
+      echo "Usage: $0 [-a] [-n] [-f] [-v] [-h]"
       echo "  -a   Generate APEX certs"
       echo "  -n   Do not prompt for password"
       echo "  -v   Generate AVB certificate"
+      echo "  -f   Force overwrite existing certificates"
       echo "  -h   Show this help message"
       exit 0
       ;;
     a) apex=true ;;
     n) no_pass=true ;;
     v) avb=true ;;
+    f) force=true ;;
     \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
   esac
 done
@@ -46,8 +49,12 @@ generate_cert() {
   [[ "$name" == "verity" ]] && keysize=2048
 
   if [[ -e "$name.pk8" || -e "$name.x509.pem" ]]; then
-    read -rp "Certificate '$name' exists. Overwrite? [y/N]: " reply
-    [[ "$reply" =~ ^[Yy]$ ]] || { echo "Skipping $name."; return; }
+    if ! $force; then
+      echo "File '$name' exists. Skipping (use -f to overwrite)."
+      return
+    else
+      echo "Overwriting existing certificate: $name"
+    fi
   fi
 
   echo "Generating cert: $name ($keysize-bit RSA)"
@@ -77,6 +84,16 @@ generate_cert() {
 
 if $avb; then
   echo "Generating AVB key..."
+
+  if [[ -e "avb.pem" || -e "avb_pkmd.bin" ]]; then
+    if ! $force; then
+      echo "AVB key files exist. Skipping (use -f to overwrite)."
+      exit 0
+    else
+      echo "Overwriting existing AVB key files due to -f"
+    fi
+  fi
+
   if [[ -z "$password" ]]; then
     openssl genrsa -out avb.pem 4096
     python3 $dir/extract_public_key.py --key avb.pem --output avb_pkmd.bin
@@ -84,6 +101,7 @@ if $avb; then
     openssl genrsa 4096 | openssl pkcs8 -topk8 -scrypt -out avb.pem -passout pass:"$password"
     python3 $dir/extract_public_key.py --key avb.pem --output avb_pkmd.bin --password "$password"
   fi
+
   exit 0
 fi
 
