@@ -45,6 +45,9 @@ if ! $encrypt && ! $decrypt && ! $check; then
   exit 1
 fi
 
+cert_list=$(<"$dir/common.list")
+cert_list+=$(<"$dir/apex.list")
+
 # Shift the options so that $1 is the first argument after the options
 shift $((OPTIND - 1))
 
@@ -82,7 +85,7 @@ if $encrypt; then
   export new_password
 
   # Loop through keys and encrypt with new passphrase
-  for key in $(<"$dir/common.list"); do
+  for key in $cert_list; do
     if [[ -f $key.pk8 ]]; then
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -passout env:new_password -scrypt
@@ -105,7 +108,7 @@ if $encrypt; then
   unset new_password
 elif $decrypt; then
   # Decrypt each key in the directory
-  for key in $(<"$dir/common.list"); do
+  for key in $cert_list; do
     if [[ -f $key.pk8 ]]; then
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -nocrypt
@@ -125,8 +128,6 @@ elif $decrypt; then
   fi
 elif $check; then
   echo "Checking keys in: $1"
-  cert_list=$(<"$dir/apex.list")
-  cert_list+=$(<"$dir/common.list")
   for key in $cert_list; do
       [[ -f "$key.pk8" ]] || continue
 
