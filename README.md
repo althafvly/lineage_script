@@ -35,15 +35,14 @@
    - Run the generate_keys.sh script to generate the keys:
 
    ```
-   Usage: generate_keys.sh [-a] [-n] [-v] [-h]
-     -a   Generate APEX certs
+   Usage: generate_keys.sh [-f] [-n] [-h]
      -n   Do not prompt for password
-     -v   Generate AVB certificate
+     -f   Force overwrite existing certificates
      -h   Show this help message
    ```
 
    ```
-   bash script/generate_keys.sh -a
+   bash script/generate_keys.sh
    ```
 5. Generate a signed build OTA and factory image using the following command:
    ```

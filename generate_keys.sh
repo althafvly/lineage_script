@@ -1,25 +1,19 @@
 #!/bin/bash
 
-apex=false
 no_pass=false
-avb=false
 force=false
 
 # Parse CLI options
-while getopts ":hanvf" opt; do
+while getopts ":hnf" opt; do
   case ${opt} in
     h)
-      echo "Usage: $0 [-a] [-n] [-f] [-v] [-h]"
-      echo "  -a   Generate APEX certs"
+      echo "Usage: $0 [-n] [-f] [-h]"
       echo "  -n   Do not prompt for password"
-      echo "  -v   Generate AVB certificate"
       echo "  -f   Force overwrite existing certificates"
       echo "  -h   Show this help message"
       exit 0
       ;;
-    a) apex=true ;;
     n) no_pass=true ;;
-    v) avb=true ;;
     f) force=true ;;
     \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
   esac
@@ -27,13 +21,16 @@ done
 
 dir="$(dirname "$(realpath "$0")")"
 
+if [[ "$PWD" == "$dir" ]]; then
+  outdir="$dir/keys"
+  mkdir -p "$outdir"
+  cd $outdir
+fi
+
 subject='/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=LineageOS/emailAddress=android@android.com'
 
-if $apex; then
-  cert_list=$(<"$dir/apex.list")
-else
-  cert_list=$(<"$dir/common.list")
-fi
+cert_list=$(<"$dir/common.list")
+cert_list+=$(<"$dir/apex.list")
 
 if [ "$no_pass" != true ]; then
   read -rsp "Enter password for certificate keys (leave blank for no password): " password
@@ -82,27 +79,26 @@ generate_cert() {
   rm -f "$name.key"
 }
 
-if $avb; then
+generate_avb() {
   echo "Generating AVB key..."
-
-  if [[ -e "avb.pem" || -e "avb_pkmd.bin" ]]; then
-    if ! $force; then
-      echo "AVB key files exist. Skipping (use -f to overwrite)."
-      exit 0
-    else
-      echo "Overwriting existing AVB key files due to -f"
-    fi
-  fi
-
   if [[ -z "$password" ]]; then
     openssl genrsa -out avb.pem 4096
-    python3 $dir/extract_public_key.py --key avb.pem --output avb_pkmd.bin
+    python3 $dir/extract_public_key.py --key avb.pem --output avb_pkmd.bin --no-password
   else
     openssl genrsa 4096 | openssl pkcs8 -topk8 -scrypt -out avb.pem -passout pass:"$password"
     python3 $dir/extract_public_key.py --key avb.pem --output avb_pkmd.bin --password "$password"
   fi
+}
 
-  exit 0
+if [[ -e "avb.pem" || -e "avb_pkmd.bin" ]]; then
+  if ! $force; then
+    echo "AVB key files exist. Skipping (use -f to overwrite)."
+  else
+    echo "Overwriting existing AVB key files due to -f"
+    generate_avb
+  fi
+else
+  generate_avb
 fi
 
 for cert in $cert_list; do

@@ -87,16 +87,21 @@ def main():
     parser.add_argument('--key', required=True, help='Path to private key PEM')
     parser.add_argument('--output', required=True, help='Output file')
     parser.add_argument('--password', help='Optional key password (unsafe on command line)')
+    parser.add_argument('--no-password', action='store_true',
+                        help='Skip password prompt and assume no password')
 
     args = parser.parse_args()
 
-    password = args.password
-    if password is None:
-        try:
-            password = getpass.getpass("Enter key password (if any): ")
-        except KeyboardInterrupt:
-            print("\nCancelled.")
-            return
+    if args.no_password:
+        password = None
+    else:
+        password = args.password
+        if password is None:
+            try:
+                password = getpass.getpass("Enter key password (if any): ")
+            except KeyboardInterrupt:
+                print("\nCancelled.")
+                return
 
     try:
         extract_public_key(args.key, args.output, password if password else None)
