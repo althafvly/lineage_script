@@ -8,11 +8,11 @@ com.android.bluetooth
 com.android.bt
 com.android.btservices
 com.android.cellbroadcast
-com.android.crashrecovery
 com.android.compos
 com.android.configinfrastructure
 com.android.connectivity.resources
 com.android.conscrypt
+com.android.crashrecovery
 com.android.devicelock
 com.android.extservices
 com.android.graphics.pdf
@@ -21,8 +21,16 @@ com.android.hardware.biometrics.face.virtual
 com.android.hardware.biometrics.fingerprint.virtual
 com.android.hardware.boot
 com.android.hardware.cas
+com.android.hardware.contexthub
+com.android.hardware.dumpstate
+com.android.hardware.gatekeeper.nonsecure
 com.android.hardware.neuralnetworks
+com.android.hardware.power
 com.android.hardware.rebootescrow
+com.android.hardware.thermal
+com.android.hardware.threadnetwork
+com.android.hardware.uwb
+com.android.hardware.vibrator
 com.android.hardware.wifi
 com.android.healthfitness
 com.android.hotspot2.osulogin
@@ -47,6 +55,7 @@ com.android.scheduling
 com.android.sdkext
 com.android.support.apexer
 com.android.telephony
+com.android.telephonycore
 com.android.telephonymodules
 com.android.tethering
 com.android.tzdata
