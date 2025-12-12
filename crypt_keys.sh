@@ -92,6 +92,7 @@ if $encrypt; then
       else
         openssl pkcs8 -topk8 -inform DER -in $key.pk8 -outform DER -out "$tmp/$key.pk8" -passout env:new_password -scrypt
       fi
+      rm -f "$key.pem" "$tmp/$key.pem"
     fi
   done
 
@@ -112,6 +113,7 @@ elif $decrypt; then
     if [[ -f $key.pk8 ]]; then
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -nocrypt
+        openssl pkcs8 -inform DER -nocrypt -in "$tmp/$key.pk8" -out "$tmp/$key.pem"
       else
         openssl pkcs8 -topk8 -inform DER -in $key.pk8 -outform DER -out "$tmp/$key.pk8" -nocrypt
       fi
