@@ -13,7 +13,7 @@ encrypt=false
 decrypt=false
 check=false
 
-while getopts "edc" opt; do
+while getopts "edcp:" opt; do
   case $opt in
   e)
     # Encoding option selected
@@ -27,6 +27,9 @@ while getopts "edc" opt; do
     # Check option selected
     check=true
     ;;
+  p)
+    password="$OPTARG"
+    ;;
   \?)
     # Invalid option selected
     echo "Invalid option: -$OPTARG" >&2
@@ -38,10 +41,11 @@ done
 dir="$(dirname "$(realpath "$0")")"
 
 if ! $encrypt && ! $decrypt && ! $check; then
-  echo "Usage: $(basename "$0") [-e | -d| -c] key_directory"
+  echo "Usage: $(basename "$0") [-e | -d | -c] [-p password] key_directory"
   echo "  -e: Encrypt the keys"
   echo "  -d: Decrypt the keys"
   echo "  -c: Check decrypted keys"
+  echo "  -p: Key passphrase (optional; will prompt if not provided)"
   exit 1
 fi
 
@@ -62,8 +66,10 @@ if ( $encrypt || $decrypt ); then
   tmp="$(mktemp -d /dev/shm/crypt_keys.XXXXXXXXXX)"
 
   # Prompt for key password if not defined
-  [[ "${password+defined}" = defined ]] || read -r -p "Enter key passphrase (empty if none): " -s password
-  echo
+  if [[ -z "${password:-}" ]]; then
+    read -r -p "Enter key passphrase (empty if none): " -s password
+    echo
+  fi
 
   # Export password for openssl to use
   export password
