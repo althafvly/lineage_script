@@ -47,12 +47,10 @@ else
   fi
 fi
 
-# Decrypt the keys in advance for improved performance and modern algorithm support
-# Copy the keys to a temporary directory and remove it when the script exits.
+# Decrypt the keys in advance
 KEY_DIR="$OUT/keys"
 if [ ! -d "$KEY_DIR" ]; then
-  cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
-  "$dir"/crypt_keys.sh -d "$KEY_DIR"
+  "$dir"/crypt_keys.sh -d "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 fi
 
 TARGET_DIR=$OUT/obj/PACKAGING/target_files_intermediates

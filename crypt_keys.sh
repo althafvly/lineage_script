@@ -41,7 +41,7 @@ done
 dir="$(dirname "$(realpath "$0")")"
 
 if ! $encrypt && ! $decrypt && ! $check; then
-  echo "Usage: $(basename "$0") [-e | -d | -c] [-p password] key_directory"
+  echo "Usage: $(basename "$0") [-e | -d | -c] [-p password] key_directory output_directory"
   echo "  -e: Encrypt the keys"
   echo "  -d: Decrypt the keys"
   echo "  -c: Check decrypted keys"
@@ -56,15 +56,13 @@ cert_list+=$(<"$dir/apex.list")
 shift $((OPTIND - 1))
 
 # Ensure that a single argument, the key directory, is passed in
-[[ $# -ne 1 ]] && print_error "expected 1 argument (key directory)"
+[[ $# -ne 2 ]] && print_error "expected 2 arguments (key directory, output directory)"
 
-# Move to the key directory
-cd "$1"
+key_dir="$(realpath "$1")"
+out_dir="$(realpath "$2")"
+mkdir -p "$out_dir"
 
 if ( $encrypt || $decrypt ); then
-  # Create a temporary directory for the decrypted/encrypted keys
-  tmp="$(mktemp -d /dev/shm/crypt_keys.XXXXXXXXXX)"
-
   # Prompt for key password if not defined
   if [[ -z "${password:-}" ]]; then
     read -r -p "Enter key passphrase (empty if none): " -s password
@@ -92,22 +90,21 @@ if $encrypt; then
 
   # Loop through keys and encrypt with new passphrase
   for key in $cert_list; do
-    if [[ -f $key.pk8 ]]; then
+    if [[ -f "$key_dir/$key.pk8" ]]; then
       if [[ -n $password ]]; then
-        openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -passout env:new_password -scrypt
+        openssl pkcs8 -inform DER -in $key_dir/$key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$out_dir/$key.pk8" -passout env:new_password -scrypt
       else
-        openssl pkcs8 -topk8 -inform DER -in $key.pk8 -outform DER -out "$tmp/$key.pk8" -passout env:new_password -scrypt
+        openssl pkcs8 -topk8 -inform DER -in $key_dir/$key.pk8 -outform DER -out "$out_dir/$key.pk8" -passout env:new_password -scrypt
       fi
-      rm -f "$key.pem" "$tmp/$key.pem"
     fi
   done
 
   # Encrypt avb.pem with new passphrase
-  if [[ -f avb.pem ]]; then
+  if [[ -f $key_dir/avb.pem ]]; then
     if [[ -n $password ]]; then
-      openssl pkcs8 -topk8 -in avb.pem -passin env:password -out "$tmp/avb.pem" -passout env:new_password -scrypt
+      openssl pkcs8 -topk8 -in $key_dir/avb.pem -passin env:password -out "$out_dir/avb.pem" -passout env:new_password -scrypt
     else
-      openssl pkcs8 -topk8 -in avb.pem -out "$tmp/avb.pem" -passout env:new_password -scrypt
+      openssl pkcs8 -topk8 -in $key_dir/avb.pem -out "$out_dir/avb.pem" -passout env:new_password -scrypt
     fi
   fi
 
@@ -116,30 +113,30 @@ if $encrypt; then
 elif $decrypt; then
   # Decrypt each key in the directory
   for key in $cert_list; do
-    if [[ -f $key.pk8 ]]; then
+    if [[ -f $key_dir/$key.pk8 ]]; then
       if [[ -n $password ]]; then
-        openssl pkcs8 -inform DER -in $key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$tmp/$key.pk8" -nocrypt
-        openssl pkcs8 -inform DER -nocrypt -in "$tmp/$key.pk8" -out "$tmp/$key.pem"
+        openssl pkcs8 -inform DER -in $key_dir/$key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$out_dir/$key.pk8" -nocrypt
+        openssl pkcs8 -inform DER -nocrypt -in "$out_dir/$key.pk8" -out "$out_dir/$key.pem"
       else
-        openssl pkcs8 -topk8 -inform DER -in $key.pk8 -outform DER -out "$tmp/$key.pk8" -nocrypt
+        openssl pkcs8 -topk8 -inform DER -in $key_dir/$key.pk8 -outform DER -out "$out_dir/$key.pk8" -nocrypt
       fi
     fi
   done
 
   # Decrypt avb.pem if it exists in the directory
-  if [[ -f avb.pem ]]; then
+  if [[ -f $key_dir/avb.pem ]]; then
     if [[ -n $password ]]; then
-      openssl pkcs8 -topk8 -in avb.pem -passin env:password -out "$tmp/avb.pem" -nocrypt
+      openssl pkcs8 -topk8 -in $key_dir/avb.pem -passin env:password -out "$out_dir/avb.pem" -nocrypt
     else
-      openssl pkcs8 -topk8 -in avb.pem -out "$tmp/avb.pem" -nocrypt
+      openssl pkcs8 -topk8 -in $key_dir/avb.pem -out "$out_dir/avb.pem" -nocrypt
     fi
   fi
 elif $check; then
   echo "Checking keys in: $1"
   for key in $cert_list; do
-      [[ -f "$key.pk8" ]] || continue
+      [[ -f "$key_dir/$key.pk8" ]] || continue
 
-      openssl pkcs8 -inform DER -nocrypt -in "$key.pk8" -out /dev/null 2>/dev/null
+      openssl pkcs8 -inform DER -nocrypt -in "$key_dir/$key.pk8" -out /dev/null 2>/dev/null
 
       if [[ $? -ne 0 ]]; then
           echo "$key failed"
@@ -151,8 +148,3 @@ fi
 # Unset the password environment variable
 unset password
 
-# Move the decrypted keys to the original directory
-if ( $encrypt || $decrypt ) && [[ -d $tmp ]]; then
-  mv "$tmp"/* .
-  rm -rf "$tmp"
-fi

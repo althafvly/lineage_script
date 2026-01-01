@@ -49,8 +49,7 @@ NEW_TARGET_DIR=${NEW_TARGET_ZIP%/*}
 # Decrypt the keys in advance for improved performance and modern algorithm support
 # Copy the keys to a temporary directory and remove it when the script exits.
 KEY_DIR="$NEW_TARGET_DIR/keys"
-cp -r "$PERSISTENT_KEY_DIR" "$KEY_DIR"
-"$dir"/crypt_keys.sh -d "$KEY_DIR"
+"$dir"/crypt_keys.sh -d "$PERSISTENT_KEY_DIR" "$KEY_DIR"
 
 # Create the incremental OTA package
 ota_from_target_files "${EXTRA_OTA[@]}" -k "$KEY_DIR/releasekey" \
