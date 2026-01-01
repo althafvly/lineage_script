@@ -91,6 +91,7 @@ if $encrypt; then
   # Loop through keys and encrypt with new passphrase
   for key in $cert_list; do
     if [[ -f "$key_dir/$key.pk8" ]]; then
+      echo "Ecrypting key: $key"
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key_dir/$key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$out_dir/$key.pk8" -passout env:new_password -scrypt
       else
@@ -101,6 +102,7 @@ if $encrypt; then
 
   # Encrypt avb.pem with new passphrase
   if [[ -f $key_dir/avb.pem ]]; then
+    echo "Ecrypting key: avb"
     if [[ -n $password ]]; then
       openssl pkcs8 -topk8 -in $key_dir/avb.pem -passin env:password -out "$out_dir/avb.pem" -passout env:new_password -scrypt
     else
@@ -114,6 +116,7 @@ elif $decrypt; then
   # Decrypt each key in the directory
   for key in $cert_list; do
     if [[ -f $key_dir/$key.pk8 ]]; then
+      echo "Decrypting key: $key"
       if [[ -n $password ]]; then
         openssl pkcs8 -inform DER -in $key_dir/$key.pk8 -passin env:password | openssl pkcs8 -topk8 -outform DER -out "$out_dir/$key.pk8" -nocrypt
         openssl pkcs8 -inform DER -nocrypt -in "$out_dir/$key.pk8" -out "$out_dir/$key.pem"
@@ -125,6 +128,7 @@ elif $decrypt; then
 
   # Decrypt avb.pem if it exists in the directory
   if [[ -f $key_dir/avb.pem ]]; then
+    echo "Decrypting key: avb"
     if [[ -n $password ]]; then
       openssl pkcs8 -topk8 -in $key_dir/avb.pem -passin env:password -out "$out_dir/avb.pem" -nocrypt
     else
@@ -135,6 +139,7 @@ elif $check; then
   echo "Checking keys in: $1"
   for key in $cert_list; do
       [[ -f "$key_dir/$key.pk8" ]] || continue
+      echo "Checking key: $key"
 
       openssl pkcs8 -inform DER -nocrypt -in "$key_dir/$key.pk8" -out /dev/null 2>/dev/null
 
