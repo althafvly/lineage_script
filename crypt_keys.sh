@@ -97,6 +97,9 @@ if $encrypt; then
         openssl pkcs8 -topk8 -inform DER -in $key_dir/$key.pk8 -outform DER -out "$out_dir/$key.pk8" -passout env:new_password -scrypt
       fi
     fi
+    if [[ -f "$key_dir/$key.x509.pem" ]]; then
+      cp "$key_dir/$key.x509.pem" "$out_dir/$key.x509.pem"
+    fi
   done
 
   # Encrypt avb.pem with new passphrase
@@ -122,6 +125,9 @@ elif $decrypt; then
       else
         openssl pkcs8 -topk8 -inform DER -in $key_dir/$key.pk8 -outform DER -out "$out_dir/$key.pk8" -nocrypt
       fi
+    fi
+    if [[ -f "$key_dir/$key.x509.pem" ]]; then
+      cp "$key_dir/$key.x509.pem" "$out_dir/$key.x509.pem"
     fi
   done
 
