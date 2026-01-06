@@ -29,8 +29,7 @@ fi
 
 subject='/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=LineageOS/emailAddress=android@android.com'
 
-cert_list=$(<"$dir/common.list")
-cert_list+=$(<"$dir/apex.list")
+cert_list="$(<"$dir/common.list")"$'\n'"$(<"$dir/apex.list")"
 
 if [ "$no_pass" != true ]; then
   read -rsp "Enter password for certificate keys (leave blank for no password): " password

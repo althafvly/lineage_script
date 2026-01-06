@@ -49,8 +49,7 @@ if ! $encrypt && ! $decrypt && ! $check; then
   exit 1
 fi
 
-cert_list=$(<"$dir/common.list")
-cert_list+=$(<"$dir/apex.list")
+cert_list="$(<"$dir/common.list")"$'\n'"$(<"$dir/apex.list")"
 
 # Shift the options so that $1 is the first argument after the options
 shift $((OPTIND - 1))
