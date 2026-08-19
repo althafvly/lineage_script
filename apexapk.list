@@ -1,3 +1,4 @@
+com.android.appsearch.apk
 AdServicesApk
 FederatedCompute
 HalfSheetUX
@@ -8,4 +9,7 @@ SafetyCenterResources
 ServiceConnectivityResources
 ServiceUwbResources
 ServiceWifiResources
+TelecomServiceResources
+TelecomUi
+WebAppService
 WifiDialog
