@@ -31,20 +31,15 @@ ROM_ROOT="${OUT%\/out/*}"
 chrt -b -p 0 $$
 
 # Set the paths to the directories containing the keys
-OLD_COMMON_KEY_DIR=$ROM_ROOT/keys/common
-OLD_PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$DEVICE
-# Use common/device keys dir if it exists
-if [ -d "$OLD_PERSISTENT_KEY_DIR" ]; then
-  PERSISTENT_KEY_DIR=$OLD_PERSISTENT_KEY_DIR
-elif [ -d "$OLD_COMMON_KEY_DIR" ]; then
-  PERSISTENT_KEY_DIR=$OLD_COMMON_KEY_DIR
+COMMON_KEY_DIR=~/.android-certs
+if [ -d "$ROM_ROOT/keys/$DEVICE" ]; then
+    PERSISTENT_KEY_DIR=$ROM_ROOT/keys/$DEVICE
+elif [ -d "$ROM_ROOT/keys/common" ]; then
+    PERSISTENT_KEY_DIR=$ROM_ROOT/keys/common
+elif [ -d "$COMMON_KEY_DIR/$DEVICE" ]; then
+    PERSISTENT_KEY_DIR=$COMMON_KEY_DIR/$DEVICE
 else
-  COMMON_KEY_DIR=~/.android-certs
-  PERSISTENT_KEY_DIR=~/.android-certs/$DEVICE
-  # Use common keys if device dir doesnt exists
-  if [ ! -d "$PERSISTENT_KEY_DIR" ]; then
     PERSISTENT_KEY_DIR=$COMMON_KEY_DIR
-  fi
 fi
 
 # Decrypt the keys in advance
