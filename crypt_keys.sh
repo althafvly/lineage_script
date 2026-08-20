@@ -39,6 +39,7 @@ while getopts "edcp:" opt; do
 done
 
 dir="$(dirname "$(realpath "$0")")"
+source "$dir/cert_lists.sh"
 
 if ! $encrypt && ! $decrypt && ! $check; then
   echo "Usage: $(basename "$0") [-e | -d | -c] [-p password] key_directory output_directory"
@@ -48,8 +49,6 @@ if ! $encrypt && ! $decrypt && ! $check; then
   echo "  -p: Key passphrase (optional; will prompt if not provided)"
   exit 1
 fi
-
-cert_list="$(<"$dir/common.list")"$'\n'"$(<"$dir/apex.list")"
 
 # Shift the options so that $1 is the first argument after the options
 shift $((OPTIND - 1))
@@ -88,7 +87,7 @@ if $encrypt; then
   export new_password
 
   # Loop through keys and encrypt with new passphrase
-  for key in $cert_list; do
+  for key in $COMMON_CERTS $APEX_CERTS; do
     if [[ -f "$key_dir/$key.pk8" ]]; then
       echo "Ecrypting key: $key"
       if [[ -n $password ]]; then
@@ -116,7 +115,7 @@ if $encrypt; then
   unset new_password
 elif $decrypt; then
   # Decrypt each key in the directory
-  for key in $cert_list; do
+  for key in $COMMON_CERTS $APEX_CERTS; do
     if [[ -f $key_dir/$key.pk8 ]]; then
       echo "Decrypting key: $key"
       if [[ -n $password ]]; then
@@ -142,7 +141,7 @@ elif $decrypt; then
   fi
 elif $check; then
   echo "Checking keys in: $1"
-  for key in $cert_list; do
+  for key in $COMMON_CERTS $APEX_CERTS; do
       [[ -f "$key_dir/$key.pk8" ]] || continue
       echo "Checking key: $key"
 
@@ -157,4 +156,3 @@ fi
 
 # Unset the password environment variable
 unset password
-

@@ -20,6 +20,7 @@ while getopts ":hnf" opt; do
 done
 
 dir="$(dirname "$(realpath "$0")")"
+source "$dir/cert_lists.sh"
 
 if [[ "$PWD" == "$dir" ]]; then
   outdir="$dir/keys"
@@ -28,8 +29,6 @@ if [[ "$PWD" == "$dir" ]]; then
 fi
 
 subject='/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=LineageOS/emailAddress=android@android.com'
-
-cert_list="$(<"$dir/common.list")"$'\n'"$(<"$dir/apex.list")"
 
 if [ "$no_pass" != true ]; then
   read -rsp "Enter password for certificate keys (leave blank for no password): " password
@@ -100,6 +99,6 @@ else
   generate_avb
 fi
 
-for cert in $cert_list; do
+for cert in $COMMON_CERTS $APEX_CERTS; do
   generate_cert "$cert"
 done

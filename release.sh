@@ -2,6 +2,7 @@
 
 # Load the shared setup (strict mode, print_error, dir, key directory helpers)
 source "$(dirname "$(realpath "$0")")/common.sh"
+source "$dir/cert_lists.sh"
 
 # Set the device type
 if [ -z "$TARGET_PRODUCT" ]; then
@@ -41,7 +42,7 @@ if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
   SIGN_TARGETS=()
 
   if [ "$PRODUCT_VERSION_MAJOR" -ge 19 ]; then
-    for PACKAGE in $(cat "$dir/apex.list"); do
+    for PACKAGE in $APEX_CERTS; do
       if [ -f "$KEY_DIR/$PACKAGE.pem" ]; then
         SIGN_TARGETS+=(--extra_apks "$PACKAGE.apex=$KEY_DIR/$PACKAGE"
           --extra_apex_payload_key "$PACKAGE.apex=$KEY_DIR/$PACKAGE.pem")
@@ -55,7 +56,7 @@ if [ "$(find $TARGET_DIR/ -name *-target_files*.zip -print -quit)" ]; then
       fi
     done
 
-    for PACKAGE in $(cat "$dir/apexapk.list"); do
+    for PACKAGE in $APEXAPK_CERTS; do
       SIGN_TARGETS+=(--extra_apks "$PACKAGE.apk=$KEY_DIR/releasekey")
     done
   fi
